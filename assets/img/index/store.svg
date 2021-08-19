@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="46px" height="46px" viewBox="0 0 46 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组 20</title>
+    <g id="0727dashboard蓝湖" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="dashboard/中文备份" transform="translate(-208.000000, -195.000000)">
+            <g id="编组-20" transform="translate(208.000000, 195.000000)">
+                <g id="编组-18" transform="translate(6.000000, 6.000000)">
+                    <path d="M6.7145254,0 L27.2854746,0 C29.9328561,4.0186232e-16 32.1213869,2.06357674 32.2768465,4.70638989 L33.6886112,28.7063899 C33.8507676,31.4630485 31.747508,33.8292155 28.9908494,33.9913719 C28.893085,33.9971227 28.7951727,34 28.6972393,34 L5.3027607,34 C2.54133695,34 0.302760696,31.7614237 0.302760696,29 C0.302760696,28.9020666 0.305637982,28.8041543 0.31138883,28.7063899 L1.72315354,4.70638989 C1.87861313,2.06357674 4.06714386,2.26267294e-15 6.7145254,0 Z" id="矩形" fill="#FFCA2C"></path>
+                    <path d="M10,9 C10,12.8659932 13.1340068,16 17,16 C20.8659932,16 24,12.8659932 24,9" id="路径" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"></path>
+                </g>
+                <rect id="矩形" x="0" y="0" width="46" height="46"></rect>
+            </g>
+        </g>
+    </g>
+</svg>
