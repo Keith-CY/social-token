@@ -16,9 +16,7 @@ export default class UnipassSigner extends Signer {
         sigs.push('0x')
       }
     }
-
-    console.log('sigs', sigs)
-
+    // console.log('sigs', sigs)
     return sigs
   }
 }

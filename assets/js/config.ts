@@ -90,7 +90,7 @@ export function getCkbEnv(): Url {
   const isLina = window.localStorage.getItem('lina')
   let data = testCKB
   if (isLina) data = mainCKB
-  console.log('[cells]:', isLina, data)
+  // console.log('[cells]:', isLina, data)
   return data
 }
 
@@ -98,7 +98,7 @@ export function getCellDeps(): CellDep[] {
   const isLina = window.localStorage.getItem('lina')
   let data = AggronCellDeps
   if (isLina) data = LinaCellDeps
-  console.log('[cells]:', isLina, data)
+  // console.log('[cells]:', isLina, data)
   return data
 }
 

@@ -50,7 +50,7 @@ export default class UnipassProvider extends Provider {
 
     const addressStr = pubkeyToAddress(masterPubkey)
     this.address = new Address(addressStr, AddressType.ckb)
-    console.log('this.address----', this.address)
+    // console.log('this.address----', this.address)
   }
 
   async init(): Promise<UnipassProvider> {
@@ -59,11 +59,11 @@ export default class UnipassProvider extends Provider {
     })
   }
   async recover(): Promise<UnipassProvider> {
-    console.log('[UnipassProvider] to recover')
+    // console.log('[UnipassProvider] to recover')
     return new Promise((resolve) => resolve(this))
   }
   sign(message: string): Promise<string> {
-    console.log('[UnipassProvider] message to sign', message)
+    // console.log('[UnipassProvider] message to sign', message)
     return new Promise((resolve) => resolve(''))
   }
 
@@ -75,13 +75,13 @@ export default class UnipassProvider extends Provider {
 export function pubkeyToAddress(pubkey: string): string {
   const pubKeyBuffer = Buffer.from(pubkey.replace('0x', ''), 'hex')
 
-  console.log('pubKeyBuffer', new Uint8Array(pubKeyBuffer))
+  // console.log('pubKeyBuffer', new Uint8Array(pubKeyBuffer))
   const hashHex = new Blake2bHasher()
     .update(pubKeyBuffer.buffer)
     .digest()
     .serializeJson()
     .slice(0, 42)
-  console.log('------hashHex', hashHex)
+  // console.log('------hashHex', hashHex)
   const isLina = window.localStorage.getItem('lina')
   let script: Script
   if (isLina) {
@@ -98,6 +98,6 @@ export function pubkeyToAddress(pubkey: string): string {
     )
   }
 
-  console.log('script', script)
+  // console.log('script', script)
   return script.toAddress().toCKBAddress()
 }
