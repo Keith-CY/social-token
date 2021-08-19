@@ -6,7 +6,10 @@
   </div>
 </template>
 <script>
+import PWCore, { IndexerCollector } from '@lay2/pw-core'
+import { getCkbEnv } from '~/assets/js/config'
 import { getAddress } from '~/assets/js/unipass'
+import UnipassProvider from '~/assets/js/UnipassProvider.ts'
 import Header from '~/components/header.vue'
 
 export default {
@@ -44,8 +47,8 @@ export default {
       const provider = this.Sea.localStorage('provider')
       if (provider) {
         this.$store.state.provider = provider
+        this.PWCore(provider)
         this.loading = false
-        this.Sea.params('unipass_ret', '')
       } else {
         this.login()
       }
@@ -55,16 +58,23 @@ export default {
       if (ret) {
         const provider = ret.data
         if (provider.pubkey && provider.email) {
-          provider.address = getAddress(provider.pubkey)
-          this.$store.state.provider = provider
-          this.loading = false
-          this.Sea.localStorage('provider', provider)
           this.Sea.params('unipass_ret', '')
+          provider.address = getAddress(provider.pubkey)
+          this.Sea.localStorage('provider', provider)
+          this.init()
+          return
         }
-        return
       }
-      window.location.href =
-        'https://t.unipass.xyz/login?success_url=' + window.location.href
+      window.location.href = `${process.env.UNIPASS_URL}/login?success_url=${window.location.href}`
+    },
+    async PWCore(provider) {
+      const url = getCkbEnv()
+      PWCore.chainId = url.CHAIN_ID
+      await new PWCore(url.NODE_URL).init(
+        new UnipassProvider(provider.email, provider.pubkey),
+        new IndexerCollector(url.INDEXER_URL),
+        url.CHAIN_ID,
+      )
     },
   },
 }

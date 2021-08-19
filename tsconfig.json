@@ -18,7 +18,7 @@
     "types": [
       "@nuxt/types",
       "@nuxtjs/axios",
-      "@nuxtjs/sentry",
+      // "@nuxtjs/sentry",
       // "@nuxt/content",
       "@types/node"
     ]

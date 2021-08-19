@@ -79,19 +79,19 @@ export default {
     // '@nuxtjs/pwa',
     // https://go.nuxtjs.dev/content
     // '@nuxt/content',
-    '@nuxtjs/sentry',
+    // '@nuxtjs/sentry',
   ],
 
-  sentry: {
-    dsn: 'https://f4455f0b8ed44a3abb1d91eb816f548c@o952186.ingest.sentry.io/5901525', // Enter your project's DSN here
-    // Additional Module Options go here
-    // https://sentry.nuxtjs.org/sentry/options
-    config: {
-      // Add native Sentry config here
-      // https://docs.sentry.io/platforms/javascript/guides/vue/configuration/options/
-      tracesSampleRate: 1.0,
-    },
-  },
+  // sentry: {
+  //   dsn: 'https://f4455f0b8ed44a3abb1d91eb816f548c@o952186.ingest.sentry.io/5901525', // Enter your project's DSN here
+  //   // Additional Module Options go here
+  //   // https://sentry.nuxtjs.org/sentry/options
+  //   config: {
+  //     // Add native Sentry config here
+  //     // https://docs.sentry.io/platforms/javascript/guides/vue/configuration/options/
+  //     tracesSampleRate: 1.0,
+  //   },
+  // },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},

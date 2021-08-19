@@ -3,8 +3,6 @@ import Clipboard from 'v-clipboard'
 import InfiniteLoading from 'vue-infinite-loading'
 
 import Imgs from '~/components/imgs.vue'
-import Pin from '~/components/pin.vue'
-import Help from '~/components/help.vue'
 // directive
 // https://peachscript.github.io/vue-infinite-loading/zh/guide/configure-load-msg.html
 Vue.use(InfiniteLoading, {
@@ -18,5 +16,3 @@ Vue.use(InfiniteLoading, {
 Vue.use(Clipboard)
 // components
 Vue.component('Imgs', Imgs)
-Vue.component('Pin', Pin)
-Vue.component('Help', Help)
