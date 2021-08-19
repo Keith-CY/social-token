@@ -1,6 +1,6 @@
 <template>
   <div id="page-index">
-    <nuxt-link to="/asset?name=ckb">
+    <nuxt-link :to="{ path: '/asset', query: { name: 'CKB' } }">
       <el-button>CKB</el-button>
     </nuxt-link>
   </div>

@@ -6,7 +6,12 @@
   </div>
 </template>
 <script>
-import PWCore, { IndexerCollector } from '@lay2/pw-core'
+import PWCore, {
+  IndexerCollector,
+  Amount,
+  AmountUnit,
+  Script,
+} from '@lay2/pw-core'
 import { getCkbEnv } from '~/assets/js/config'
 import { getAddress } from '~/assets/js/unipass'
 import UnipassProvider from '~/assets/js/UnipassProvider.ts'
@@ -65,7 +70,8 @@ export default {
           return
         }
       }
-      window.location.href = `${process.env.UNIPASS_URL}/login?success_url=${window.location.href}`
+      const url = `${process.env.UNIPASS_URL}/login?success_url=${window.location.href}`
+      window.location.replace(url)
     },
     async PWCore(provider) {
       const url = getCkbEnv()
@@ -75,6 +81,40 @@ export default {
         new IndexerCollector(url.INDEXER_URL),
         url.CHAIN_ID,
       )
+      const addressHash = PWCore.provider.address.toLockScript().toHash()
+      this.loadAssets(addressHash)
+    },
+    async loadAssets(addressHash) {
+      const res = await this.$axios({
+        url: 'https://cellapitest.ckb.pw/cell/assets',
+        params: {
+          lockHash: addressHash,
+        },
+      })
+      if (res.code === 200) {
+        const rawAssets = res.data.assets
+        const assets = []
+        for (const e of rawAssets) {
+          const capacity = new Amount(e.capacity, AmountUnit.shannon)
+          let typeScript = null
+          if (e.typeScript) {
+            typeScript = new Script(
+              e.typeScript.codeHash,
+              e.typeScript.args,
+              e.typeScript.hashType,
+            )
+          }
+          assets.push({
+            ...e,
+            capacity,
+            sudtAmount: new Amount(e.sudtAmount, 0),
+            typeScript,
+          })
+        }
+        this.$store.state.assets = assets
+      } else {
+        this.$message.error('资产获取失败')
+      }
     },
   },
 }

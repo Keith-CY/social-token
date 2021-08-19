@@ -1,6 +1,6 @@
 <template>
   <div id="page-asset">
-    <nuxt-link to="/send">
+    <nuxt-link :to="{ path: '/send', query: { name: 'CKB' } }">
       <el-button>发送</el-button>
     </nuxt-link>
   </div>

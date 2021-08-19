@@ -1,5 +1,6 @@
 <template>
   <div id="page-send">
+    <div v-if="asset">{{ balance }} {{ asset.symbol }}</div>
     <el-input
       v-model="address"
       type="textarea"
@@ -45,6 +46,27 @@ export default {
     provider() {
       return this.$store.state.provider
     },
+    asset() {
+      const assets = this.$store.state.assets
+      const name = this.$route.query.name
+      for (const asset of assets) {
+        if (asset.symbol === name) {
+          return asset
+        }
+      }
+      return null
+    },
+    balance() {
+      const asset = this.asset
+      if (asset) {
+        const balance = asset.sudt ? asset.sudtAmount : asset.capacity
+        return balance.toString(asset.decimals, {
+          commify: true,
+          fixed: 4,
+        })
+      }
+      return ''
+    },
   },
   mounted() {
     const ret = this.Sea.json(this.$route.query.unipass_ret)
@@ -86,7 +108,7 @@ export default {
       url.searchParams.set('success_url', window.location.href)
       url.searchParams.set('message', message)
       url.searchParams.set('pubkey', pubkey)
-      window.location.href = url.href
+      window.location.replace(url.href)
     },
     async sendNext(sig) {
       try {

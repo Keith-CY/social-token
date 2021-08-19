@@ -5,6 +5,7 @@ const initState = {
     pubkey: '',
     address: '',
   },
+  assets: [],
 }
 const sotre = {
   // 严格模式
@@ -13,13 +14,6 @@ const sotre = {
   state() {
     return {
       ...initState,
-      query: {
-        success_url: '',
-        pubkey: '',
-        message: '',
-        lang: '',
-      },
-      path: '',
     }
   },
   // 获取
