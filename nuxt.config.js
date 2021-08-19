@@ -139,7 +139,7 @@ export default {
   // server
   server: {
     // host: '0.0.0.0',
-    port: 5000,
+    port: 5003,
     // https: {
     //   key: fs.readFileSync(path.resolve(__dirname, 'bin/cert.key')),
     //   cert: fs.readFileSync(path.resolve(__dirname, 'bin/cert.crt')),

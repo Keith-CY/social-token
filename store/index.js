@@ -1,17 +1,10 @@
 // vuex 状态管理
 const initState = {
-  user: {
-    account: {
-      phone: '',
-      email: '',
-      masterKey: '',
-    },
+  provider: {
+    email: '',
+    pubkey: '',
     address: '',
-    authorization: '',
-    status: 1,
-    token: '',
   },
-  nft: {},
 }
 const sotre = {
   // 严格模式

@@ -22,7 +22,7 @@
     "apollo-client": "^2.6.10",
     "apollo-link": "^1.2.14",
     "apollo-link-http": "^1.5.17",
-    "bigsea": "^2.2.5",
+    "bigsea": "^2.2.7",
     "blake2b": "^2.1.3",
     "crypto": "^1.0.1",
     "dayjs": "^1.10.5",

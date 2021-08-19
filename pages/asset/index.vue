@@ -1,7 +1,7 @@
 <template>
-  <div id="page-index">
-    <nuxt-link to="/asset?name=ckb">
-      <el-button>CKB</el-button>
+  <div id="page-asset">
+    <nuxt-link to="/send">
+      <el-button>发送</el-button>
     </nuxt-link>
   </div>
 </template>
@@ -9,6 +9,6 @@
 export default {}
 </script>
 <style lang="stylus">
-#page-index {
+#page-asset {
 }
 </style>

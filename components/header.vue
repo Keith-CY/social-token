@@ -3,9 +3,12 @@
     <div id="unipass-back" class="btn left" @click="bindBack">
       <img src="~/assets/img/back.svg" />
     </div>
-    <template v-if="isLogged">
-      <div class="account sea-colorful-border">
-        <div class="sea-text-overflow">{{ user.account.email }}</div>
+    <template v-if="provider.email">
+      <!-- <div class="account sea-colorful-border">
+        <div class="sea-text-overflow">{{ provider.email }}</div>
+      </div> -->
+      <div class="title">
+        {{ $t($route.name + '.title') }}
       </div>
       <el-popover
         ref="popover"
@@ -67,11 +70,8 @@ export default {
     }
   },
   computed: {
-    isLogged() {
-      return this.$store.state.user.account.masterKey
-    },
-    user() {
-      return this.$store.state.user
+    provider() {
+      return this.$store.state.provider
     },
   },
   created() {
@@ -162,6 +162,12 @@ export default {
     padding: 0 16px;
     text-align: center;
     font-weight: bold;
+  }
+
+  > .title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333333;
   }
 
   > .btn.right {
