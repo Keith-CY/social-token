@@ -17,27 +17,29 @@
           <span>收款</span>
           <img src="~/assets/img/asset/qrcode.svg" />
         </div>
-        <div class="btn right">
+        <div class="btn right" @click="bindSend">
           <span>转账</span>
           <img src="~/assets/img/asset/send.svg" />
         </div>
       </div>
     </div>
-    <nuxt-link :to="{ path: '/send', query: $route.query }">
-      <el-button>发送</el-button>
-    </nuxt-link>
-    <el-radio-group v-model="direction" @change="bindDirection">
-      <el-radio-button label="all">全部</el-radio-button>
-      <el-radio-button label="in">收入</el-radio-button>
-      <el-radio-button label="out">转出</el-radio-button>
-    </el-radio-group>
-    <div v-loading="loading" class="tx-list">
-      <div v-for="(tx, i) in txList" :key="i">
-        {{ tx.amount }}
-      </div>
-      <div v-if="hasMore" @click="bindMore">加载更多</div>
-      <div v-else>~</div>
-    </div>
+    <el-tabs v-model="activeTab" class="tabs" @tab-click="bindTab">
+      <el-tab-pane label="代币详情" name="token"></el-tab-pane>
+      <el-tab-pane label="交易记录" name="record">
+        <el-radio-group v-model="direction" @change="bindDirection">
+          <el-radio-button label="all">全部</el-radio-button>
+          <el-radio-button label="in">收入</el-radio-button>
+          <el-radio-button label="out">转出</el-radio-button>
+        </el-radio-group>
+        <div v-loading="loading" class="tx-list">
+          <div v-for="(tx, i) in txList" :key="i">
+            {{ tx.amount }}
+          </div>
+          <div v-if="hasMore" @click="bindMore">加载更多</div>
+          <div v-else>~</div>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 <script>
@@ -49,6 +51,7 @@ export default {
       loading: false,
       hasMore: true,
       size: 10,
+      activeTab: 'record',
     }
   },
   computed: {
@@ -92,6 +95,13 @@ export default {
     }
   },
   methods: {
+    bindSend() {
+      this.$router.push({
+        path: '/send',
+        query: this.$route.query,
+      })
+    },
+    bindTab() {},
     async loadTxRecords(lastTxId) {
       this.loading = true
       const res = await this.$axios({
@@ -214,9 +224,83 @@ export default {
     }
   }
 
-  .tx-list {
+  .tabs {
+    margin-top: 21px;
+    border-radius: 14px;
     width: 100%;
-    min-height: 200px;
+    background: white;
+
+    .el-tabs__header {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+
+      .el-tabs__item {
+        height: 52px;
+        line-height: 52px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #999999;
+      }
+
+      .el-tabs__item.is-active {
+        color: #333333;
+      }
+
+      .el-tabs__active-bar {
+        width: 36px !important;
+        height: 4px;
+        margin: 0 14px;
+        background: linear-gradient(320deg, #1C7BFF 0%, #9D6FFF 100%);
+        border-radius: 2px;
+      }
+
+      .el-tabs__nav-wrap::after {
+        background-color: transparent;
+      }
+    }
+
+    .el-tab-pane {
+      width: 100%;
+      padding: 0 20px;
+
+      .el-radio-group {
+        height: 32px;
+        border-radius: 16px;
+        border: 1px solid #E9F0FF;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+
+        .el-radio-button {
+          flex: 1;
+
+          .el-radio-button__inner {
+            width: 100%;
+            border: 0;
+            box-shadow: none;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: none;
+          }
+        }
+
+        .el-radio-button.is-active {
+          .el-radio-button__inner {
+            border-radius: 16px;
+            background: linear-gradient(320deg, #1C7BFF 0%, #9D6FFF 100%);
+          }
+        }
+      }
+    }
+
+    .tx-list {
+      width: 100%;
+      min-height: 200px;
+    }
   }
 }
 </style>
