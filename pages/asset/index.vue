@@ -4,7 +4,7 @@
       <img class="bg" src="~/assets/img/index/info-card-blur.svg" />
       <div class="top">
         <div class="left">
-          <imgs class="icon" :src="asset.icon" />
+          <img class="icon" :src="asset.icon" />
           <div class="info">
             <div class="symbol">{{ asset.symbol }}</div>
             <div class="name">{{ asset.name }}</div>
@@ -24,25 +24,55 @@
       </div>
     </div>
     <el-tabs v-model="activeTab" class="tabs" @tab-click="bindTab">
-      <el-tab-pane label="代币详情" name="token"></el-tab-pane>
-      <el-tab-pane label="交易记录" name="record">
+      <el-tab-pane class="token" label="代币详情" name="token">
+        <div class="user">
+          <img class="avatar" src="~/assets/img/index/avatar.png" />
+          <div class="name">Andy Warhol</div>
+          <div class="publisher sea-colorful-border">发行人</div>
+        </div>
+        <div class="introduction">
+          Helen Kennedy aka ZazzCorp an artist illustrator with an obsession for
+          drawing skulls. The Zazz Corp motto Design for Weirdos" embodies the
+          strange, far out, and weird.
+        </div>
+      </el-tab-pane>
+      <el-tab-pane class="record" label="交易记录" name="record">
         <el-radio-group v-model="direction" @change="bindDirection">
           <el-radio-button label="all">全部</el-radio-button>
           <el-radio-button label="in">收入</el-radio-button>
           <el-radio-button label="out">转出</el-radio-button>
         </el-radio-group>
-        <div v-loading="loading" class="tx-list">
-          <div v-for="(tx, i) in txList" :key="i">
-            {{ tx.amount }}
+        <div class="tx-list">
+          <div
+            v-for="(tx, i) in txList"
+            :key="i"
+            class="tx"
+            :class="formatState(tx)"
+          >
+            <imgs
+              class="state"
+              :src="require(`~/assets/img/asset/${formatState(tx)}.svg`)"
+            />
+            <div class="info">
+              <div class="address">{{ formatAddress(tx.from) }}</div>
+              <div class="time">{{ formatDate(tx.time) }}</div>
+            </div>
+            <div class="balance">{{ formatBalance(tx) }}</div>
           </div>
-          <div v-if="hasMore" @click="bindMore">加载更多</div>
-          <div v-else>~</div>
+          <div v-loading="loading" class="more">
+            <div v-if="hasMore" class="load" @click="bindMore">加载更多</div>
+            <div v-else class="end">~</div>
+          </div>
         </div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+import { Amount, AmountUnit } from '@lay2/pw-core'
+dayjs.locale('zh-cn')
 export default {
   data() {
     return {
@@ -95,6 +125,27 @@ export default {
     }
   },
   methods: {
+    formatDate(time) {
+      return dayjs(time).format('YYYY/M/D Ah:m')
+    },
+    formatBalance(tx) {
+      const asset = this.asset
+      const balance = new Amount(tx.amount, AmountUnit.shannon)
+      const string = balance.toString(asset.decimals, {
+        commify: true,
+        fixed: 4,
+      })
+      const op = tx.direction === 'out' ? '-' : '+'
+      return op + string
+    },
+    formatState(tx) {
+      return tx.direction
+    },
+    formatAddress(address) {
+      const start = address.slice(0, 8)
+      const end = address.slice(-8)
+      return `${start}...${end}`
+    },
     bindSend() {
       this.$router.push({
         path: '/send',
@@ -195,7 +246,6 @@ export default {
     }
 
     .bottom {
-      cursor: pointer;
       position: absolute;
       bottom: 18px;
       left: 12px;
@@ -205,6 +255,7 @@ export default {
       color: #3179FF;
 
       .btn {
+        cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -229,6 +280,7 @@ export default {
     border-radius: 14px;
     width: 100%;
     background: white;
+    margin-bottom: 20px;
 
     .el-tabs__header {
       display: flex;
@@ -297,9 +349,117 @@ export default {
       }
     }
 
-    .tx-list {
-      width: 100%;
-      min-height: 200px;
+    .token {
+      .user {
+        display: flex;
+        align-items: center;
+
+        .avatar {
+          width: 36px;
+          border-radius: 50%;
+          height: 36px;
+          border: 1px solid #E9F0FF;
+        }
+
+        .name {
+          font-size: 14px;
+          font-weight: bold;
+          color: #333333;
+          margin-left: 8px;
+        }
+
+        .publisher {
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: auto;
+          width: 58px;
+          height: 26px;
+          border-radius: 14px;
+          font-size: 12px;
+          color: #3179FF;
+        }
+      }
+
+      .introduction {
+        margin-top: 16px;
+        font-size: 14px;
+        font-family: SFProText-Regular, SFProText;
+        font-weight: 400;
+        color: #666666;
+        line-height: 22px;
+        margin-bottom: 16px;
+      }
+    }
+
+    .record {
+      .tx-list {
+        margin-top: 20px;
+        width: 100%;
+        min-height: 200px;
+
+        .tx {
+          margin-top: 10px;
+          height: 68px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .state {
+            width: 20px;
+            height: 20px;
+          }
+
+          .info {
+            margin-left: 4px;
+
+            .address {
+              font-size: 14px;
+              font-weight: bold;
+              color: #333333;
+              line-height: 20px;
+            }
+
+            .time {
+              margin-top: 4px;
+              color: #B8B8B8;
+              font-size: 12px;
+              line-height: 14px;
+            }
+          }
+
+          .balance {
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: auto;
+          }
+        }
+
+        .tx.in {
+          .balance {
+            color: var(--primary);
+          }
+        }
+
+        .tx.out {
+          .balance {
+            color: #FFA71A;
+          }
+        }
+
+        .more {
+          text-align: center;
+          margin: 10px 0;
+
+          .load {
+            cursor: pointer;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+          }
+        }
+      }
     }
   }
 }
