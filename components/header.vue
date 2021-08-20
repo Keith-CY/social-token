@@ -129,7 +129,6 @@ export default {
   },
 }
 </script>
-
 <style lang="stylus">
 #unipass-header {
   width: 100%;
@@ -139,8 +138,10 @@ export default {
   justify-content: center;
   position: relative;
   z-index: 1;
+  background: #fff;
 
   > .btn {
+    background: #fff;
     cursor: pointer;
     padding: 0 20px;
     display: flex;

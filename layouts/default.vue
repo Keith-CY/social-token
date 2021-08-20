@@ -121,13 +121,13 @@ export default {
 </script>
 <style lang="stylus">
 #unipass {
+  background: #F6F7FB;
   display: flex;
   align-items: center;
   flex-direction: column;
   min-height: 100vh;
   padding: 0 20px;
   max-width: 480px;
-  background: #FFF;
   margin: 0 auto;
   overflow: hidden;
 

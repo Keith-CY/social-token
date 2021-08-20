@@ -8,7 +8,7 @@
       <el-radio-button label="in">收入</el-radio-button>
       <el-radio-button label="out">转出</el-radio-button>
     </el-radio-group>
-    <div class="tx-list" v-loading="loading">
+    <div v-loading="loading" class="tx-list">
       <div v-for="(tx, i) in txList" :key="i">
         {{ tx.amount }}
       </div>
@@ -29,8 +29,18 @@ export default {
     }
   },
   created() {
-    if (this.$route.query.name === 'CKB') {
-      this.loadTxRecords()
+    const name = this.$route.query.name
+    if (name) {
+      if (name === 'CKB') {
+        this.loadTxRecords()
+      } else {
+        this.$alert(`提示：暂不支持 ${name} 币`, {
+          confirmButtonText: '返回上一页',
+          callback: () => {
+            this.$router.back()
+          },
+        })
+      }
     } else {
       this.$router.replace('/')
     }
