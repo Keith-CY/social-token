@@ -1,6 +1,6 @@
 <template>
   <div id="page-send">
-    <div v-if="asset">{{ balance }} {{ asset.symbol }}</div>
+    <div>{{ balance }} {{ asset.symbol }}</div>
     <el-input
       v-model="address"
       type="textarea"
@@ -54,11 +54,11 @@ export default {
           return asset
         }
       }
-      return null
+      return {}
     },
     balance() {
       const asset = this.asset
-      if (asset) {
+      if (asset.decimals) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,

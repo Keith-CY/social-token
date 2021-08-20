@@ -5,7 +5,7 @@
       <div class="top">
         <div class="left">
           <div class="welcome">Welcome</div>
-          <div class="email">669511674@qq.com</div>
+          <div class="email">{{ provider.email }}</div>
         </div>
         <div class="right">
           <img class="avatar" src="~/assets/img/index/avatar.png" />
@@ -40,6 +40,9 @@
 <script>
 export default {
   computed: {
+    provider() {
+      return this.$store.state.provider
+    },
     assets() {
       return this.$store.state.assets
     },
