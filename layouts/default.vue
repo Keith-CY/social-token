@@ -175,16 +175,4 @@ export default {
     flex-direction: column;
   }
 }
-
-#unipass.index {
-  #unipass-header {
-    #unipass-back {
-      display: none;
-    }
-
-    .account {
-      display: none;
-    }
-  }
-}
 </style>

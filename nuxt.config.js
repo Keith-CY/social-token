@@ -6,7 +6,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'UniPass',
+    title: 'Portal Wallet',
     meta: [
       { charset: 'utf-8' },
       {
