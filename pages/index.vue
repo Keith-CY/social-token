@@ -1,19 +1,19 @@
 <template>
   <div id="page-index">
     <div class="info-card">
-      <img class="bg" src="~/assets/img/index/info-card.svg" />
+      <img class="bg" src="~/assets/img/home/info-card.svg" />
       <div class="top">
         <div class="left">
           <div class="welcome">Welcome</div>
           <div class="email">{{ provider.email }}</div>
         </div>
         <div class="right">
-          <img class="avatar" src="~/assets/img/index/avatar.png" />
+          <img class="avatar" src="~/assets/img/home/avatar.png" />
         </div>
       </div>
       <div class="bottom">
         <div class="left">
-          <img class="qrcode" src="~/assets/img/index/qrcode.svg" />
+          <img class="qrcode" src="~/assets/img/home/qrcode.svg" />
         </div>
       </div>
     </div>

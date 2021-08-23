@@ -1,7 +1,7 @@
 <template>
   <div id="page-asset">
     <div class="info-card">
-      <img class="bg" src="~/assets/img/index/info-card-blur.svg" />
+      <img class="bg" src="~/assets/img/home/info-card-blur.svg" />
       <div class="top">
         <div class="left">
           <img class="icon" :src="asset.icon" />
@@ -26,7 +26,7 @@
     <el-tabs v-model="activeTab" class="tabs" @tab-click="bindTab">
       <el-tab-pane class="token" label="代币详情" name="token">
         <div class="user">
-          <img class="avatar" src="~/assets/img/index/avatar.png" />
+          <img class="avatar" src="~/assets/img/home/avatar.png" />
           <div class="name">Andy Warhol</div>
           <div class="publisher sea-colorful-border">发行人</div>
         </div>
@@ -34,6 +34,34 @@
           Helen Kennedy aka ZazzCorp an artist illustrator with an obsession for
           drawing skulls. The Zazz Corp motto Design for Weirdos" embodies the
           strange, far out, and weird.
+        </div>
+        <div class="token-info">
+          <div class="info">
+            <div class="left">代币总量：</div>
+            <div class="right">45,100,000.1234</div>
+          </div>
+          <div class="info">
+            <div class="left">流通量：</div>
+            <div class="right">100,000.1234</div>
+          </div>
+          <div class="info">
+            <div class="left">发行日期：</div>
+            <div class="right">2021-8-17</div>
+          </div>
+          <div class="info">
+            <div class="left">社交方式：</div>
+            <div class="right">
+              <a href="http://unipass.xyz" target="_blank">
+                <img class="icon" src="~/assets/img/asset/github.svg" />
+              </a>
+              <a href="http://unipass.xyz" target="_blank">
+                <img class="icon" src="~/assets/img/asset/facebook.svg" />
+              </a>
+              <a href="http://unipass.xyz" target="_blank">
+                <img class="icon" src="~/assets/img/asset/twitter.svg" />
+              </a>
+            </div>
+          </div>
         </div>
       </el-tab-pane>
       <el-tab-pane class="record" label="交易记录" name="record">
@@ -390,6 +418,30 @@ export default {
         color: #666666;
         line-height: 22px;
         margin-bottom: 16px;
+      }
+
+      .token-info {
+        margin-bottom: 20px;
+
+        .info {
+          margin-top: 20px;
+          display: flex;
+          justify-content: space-between;
+          font-size: 14px;
+          font-weight: bold;
+          color: #333333;
+          line-height: 20px;
+
+          .right {
+            display: flex;
+
+            .icon {
+              margin-left: 12px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+        }
       }
     }
 
