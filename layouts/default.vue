@@ -175,4 +175,8 @@ export default {
     flex-direction: column;
   }
 }
+
+#unipass.send {
+  background: #FFFFFF;
+}
 </style>

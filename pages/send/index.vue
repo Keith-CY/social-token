@@ -1,18 +1,13 @@
 <template>
   <div id="page-send">
     <el-form
+      ref="form"
+      :rules="rules"
       label-position="top"
       :model="form"
       class="form"
-      @submit.native.prevent
     >
-      <el-form-item
-        :label="'收款地址'"
-        prop="address"
-        :rules="[
-          { required: true, message: '请填写收款地址', trigger: 'blur' },
-        ]"
-      >
+      <el-form-item :label="'收款地址'" prop="address">
         <el-input
           v-model="form.address"
           type="textarea"
@@ -23,20 +18,23 @@
         ></el-input>
       </el-form-item>
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
-      <el-form-item
-        :label="'金额'"
-        prop="amount"
-        :rules="[{ required: true, message: '请填写金额', trigger: 'blur' }]"
-      >
+      <el-form-item :label="'金额'" prop="amount">
         <el-input
           v-model="form.amount"
           type="number"
           :readonly="loading"
-          placeholder=""
+          placeholder="0"
         ></el-input>
       </el-form-item>
+      <div class="balance fee">{{ fee }} {{ asset.symbol }}</div>
+      <el-form-item :label="'手续费'"></el-form-item>
     </el-form>
-    <el-button type="primary" :loading="loading" class="send" @click="bindSend">
+    <el-button
+      type="primary"
+      :loading="loading && !balance"
+      class="send"
+      @click="bindSend"
+    >
       发送
     </el-button>
   </div>
@@ -48,6 +46,7 @@ import PWCore, {
   Address,
   AddressType,
   Amount,
+  Builder,
   normalizers,
   SerializeWitnessArgs,
   transformers,
@@ -57,15 +56,59 @@ import UnipassBuilder from '~/assets/js/UnipassBuilder.ts'
 import UnipassSigner from '~/assets/js/UnipassSigner.ts'
 export default {
   data() {
+    const checkAddress = (_rule, value, callback) => {
+      try {
+        if (value.startsWith('ckb') || value.startsWith('ckt')) {
+          // eslint-disable-next-line no-new
+          new Address(value, AddressType.ckb)
+          callback()
+        } else if (/^0x[a-fA-F0-9]{40}$/.test(value)) {
+          // eslint-disable-next-line no-new
+          new Address(value, AddressType.eth)
+          callback()
+        } else {
+          callback(new Error('错误的地址格式'))
+        }
+      } catch (error) {
+        callback(error)
+      }
+    }
+    const checkAmount = (_rule, value, callback) => {
+      try {
+        const amount = new Amount(value)
+        if (amount.lt(new Amount('61'))) {
+          callback(new Error('最小金额为 61 CKB'))
+          return
+        }
+        const asset = this.asset
+        if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
+          callback(new Error('转账金额必须小于余额'))
+          return
+        }
+      } catch (error) {
+        callback(new Error(error.message))
+        return
+      }
+      callback()
+    }
     return {
+      rules: {
+        address: [
+          { required: true, message: '请填写收款地址', trigger: 'change' },
+          { validator: checkAddress, trigger: 'change' },
+        ],
+        amount: [
+          { required: true, message: '请填写金额', trigger: 'change' },
+          { validator: checkAmount, trigger: 'change' },
+        ],
+      },
       loading: false,
       form: {
-        // address:
-        //   'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47v656967xywaf26kphp033cn2tl6qn852gc7jzch',
-        // amount: '100',
-        address: '',
+        address:
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47v656967xywaf26kphp033cn2tl6qn852gc7jzch',
         amount: '',
       },
+      fee: '0.00001551',
     }
   },
   computed: {
@@ -101,17 +144,28 @@ export default {
     }
   },
   methods: {
-    async bindSend() {
-      if (!this.check()) return
+    async buildTx(address, amount) {
+      const builder = new UnipassBuilder(
+        new Address(address, AddressType.ckb),
+        new Amount(amount),
+        1000,
+      )
+      const tx = await builder.build()
+      return tx
+    },
+    bindSend() {
+      this.$refs.form.validate((ok) => {
+        if (ok) {
+          this.send()
+        }
+      })
+    },
+    async send() {
       try {
         const { address, amount } = this.form
-        const builder = new UnipassBuilder(
-          new Address(address, AddressType.ckb),
-          new Amount(amount),
-        )
-        const signer = new UnipassSigner(PWCore.provider)
         this.loading = true
-        const tx = await builder.build()
+        const tx = await this.buildTx(address, amount)
+        const signer = new UnipassSigner(PWCore.provider)
         const messages = signer.toMessages(tx)
         const message = messages[0].message
         const pubkey = this.provider.pubkey
@@ -119,33 +173,10 @@ export default {
         this.Sea.localStorage('signData', { txObj })
         this.sign(message, pubkey)
       } catch (error) {
-        this.$message.error('交易拼接失败')
-        console.error('error', error)
+        this.$message.error(error.message)
+        console.error('error', error.message)
       }
       this.loading = false
-
-      // 备注
-      // 0 get_cells 获取 ckb 数量
-      // 1 get_cells 检查是否可以发送
-      // 2 send_transaction 发送
-    },
-    check() {
-      try {
-        const amount = new Amount(this.form.amount)
-        if (amount.lt(new Amount('61'))) {
-          this.$message.error('最小金额为 61 CKB')
-          return
-        }
-        const asset = this.asset
-        if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
-          this.$message.error('转账金额必须小于余额')
-          return
-        }
-      } catch (error) {
-        this.$message.error(error.message)
-        return
-      }
-      return false
     },
     sign(message, pubkey) {
       const url = new URL(`${process.env.UNIPASS_URL}/sign`)
@@ -174,8 +205,8 @@ export default {
         console.log(`https://explorer.nervos.org/aggron/transaction/${txHash}`)
         this.$message.success('发送成功')
       } catch (error) {
-        this.$message.error(error)
-        console.error('error', error)
+        this.$message.error(error.message)
+        console.error('error', error.message)
       }
       this.Sea.params('unipass_ret', '')
       this.loading = false
@@ -198,10 +229,16 @@ export default {
       margin-top: 70px;
       margin-bottom: -21px;
     }
+
+    .balance.fee {
+      color: var(--text-regular);
+      margin-top: 40px;
+    }
   }
 
   .send {
-    margin-top: 167px;
+    margin-top: 110px;
+    margin-bottom: 40px;
     width: 100%;
   }
 }
