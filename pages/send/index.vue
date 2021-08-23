@@ -1,20 +1,42 @@
 <template>
   <div id="page-send">
-    <div>{{ balance }} {{ asset.symbol }}</div>
-    <el-input
-      v-model="address"
-      type="textarea"
-      placeholder="address"
-      resize="none"
-      :readonly="loading"
-      autosize
-    ></el-input>
-    <el-input
-      v-model="amount"
-      :readonly="loading"
-      placeholder="amount"
-    ></el-input>
-    <el-button type="primary" :loading="loading" @click="bindSend">
+    <el-form
+      label-position="top"
+      :model="form"
+      class="form"
+      @submit.native.prevent
+    >
+      <el-form-item
+        :label="'收款地址'"
+        prop="address"
+        :rules="[
+          { required: true, message: '请填写收款地址', trigger: 'blur' },
+        ]"
+      >
+        <el-input
+          v-model="form.address"
+          type="textarea"
+          placeholder="地址格式: CKB / ETH / ENS"
+          resize="none"
+          :readonly="loading"
+          autosize
+        ></el-input>
+      </el-form-item>
+      <div class="balance">{{ balance }} {{ asset.symbol }}</div>
+      <el-form-item
+        :label="'金额'"
+        prop="amount"
+        :rules="[{ required: true, message: '请填写金额', trigger: 'blur' }]"
+      >
+        <el-input
+          v-model="form.amount"
+          type="number"
+          :readonly="loading"
+          placeholder=""
+        ></el-input>
+      </el-form-item>
+    </el-form>
+    <el-button type="primary" :loading="loading" class="send" @click="bindSend">
       发送
     </el-button>
   </div>
@@ -37,9 +59,13 @@ export default {
   data() {
     return {
       loading: false,
-      address:
-        'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47v656967xywaf26kphp033cn2tl6qn852gc7jzch',
-      amount: '100',
+      form: {
+        // address:
+        //   'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47v656967xywaf26kphp033cn2tl6qn852gc7jzch',
+        // amount: '100',
+        address: '',
+        amount: '',
+      },
     }
   },
   computed: {
@@ -76,12 +102,12 @@ export default {
   },
   methods: {
     async bindSend() {
+      if (!this.check()) return
       try {
-        const toAddress = this.address
-        const toAmount = this.amount
+        const { address, amount } = this.form
         const builder = new UnipassBuilder(
-          new Address(toAddress, AddressType.ckb),
-          new Amount(toAmount),
+          new Address(address, AddressType.ckb),
+          new Amount(amount),
         )
         const signer = new UnipassSigner(PWCore.provider)
         this.loading = true
@@ -102,6 +128,24 @@ export default {
       // 0 get_cells 获取 ckb 数量
       // 1 get_cells 检查是否可以发送
       // 2 send_transaction 发送
+    },
+    check() {
+      try {
+        const amount = new Amount(this.form.amount)
+        if (amount.lt(new Amount('61'))) {
+          this.$message.error('最小金额为 61 CKB')
+          return
+        }
+        const asset = this.asset
+        if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
+          this.$message.error('转账金额必须小于余额')
+          return
+        }
+      } catch (error) {
+        this.$message.error(error.message)
+        return
+      }
+      return false
     },
     sign(message, pubkey) {
       const url = new URL(`${process.env.UNIPASS_URL}/sign`)
@@ -141,9 +185,24 @@ export default {
 </script>
 <style lang="stylus">
 #page-send {
-  .el-input, .el-button, .el-textarea {
+  .form {
+    margin-top: 30px;
+
+    .balance {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 14px;
+      font-weight: 600;
+      color: #3179FF;
+      line-height: 20px;
+      margin-top: 70px;
+      margin-bottom: -21px;
+    }
+  }
+
+  .send {
+    margin-top: 167px;
     width: 100%;
-    margin-top: 20px;
   }
 }
 </style>

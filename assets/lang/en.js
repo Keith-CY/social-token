@@ -20,6 +20,6 @@ module.exports = {
     title: 'Asset details',
   },
   send: {
-    title: 'Send',
+    title: 'CKB transfer',
   },
 }

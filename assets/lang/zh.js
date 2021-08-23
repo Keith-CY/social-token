@@ -20,6 +20,6 @@ module.exports = {
     title: '资产详情',
   },
   send: {
-    title: '发送',
+    title: 'CKB 转账',
   },
 }
