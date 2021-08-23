@@ -72,17 +72,19 @@
         </el-radio-group>
         <div class="tx-list">
           <div
-            v-for="(tx, i) in txList"
+            v-for="(tx, i) in formatTxList"
             :key="i"
             class="tx"
-            :class="formatState(tx)"
+            :class="[formatState(tx), tx.type]"
           >
             <imgs
               class="state"
               :src="require(`~/assets/img/asset/${formatState(tx)}.svg`)"
             />
             <div class="info">
-              <div class="address">{{ formatAddress(tx.from) }}</div>
+              <div class="address">
+                {{ formatAddress(tx.from) }}
+              </div>
               <div class="time">{{ formatDate(tx.time) }}</div>
             </div>
             <div class="balance">{{ formatBalance(tx) }}</div>
@@ -106,6 +108,7 @@ export default {
     return {
       direction: 'all',
       txList: [],
+      pendingList: [],
       loading: false,
       hasMore: true,
       size: 10,
@@ -113,6 +116,14 @@ export default {
     }
   },
   computed: {
+    formatTxList() {
+      if (this.direction === 'in') {
+        return this.txList
+      } else {
+        const all = this.pendingList.concat(this.txList)
+        return all
+      }
+    },
     asset() {
       const assets = this.$store.state.assets
       const name = this.$route.query.name
@@ -152,7 +163,16 @@ export default {
       this.$router.replace('/')
     }
   },
+  mounted() {
+    this.initPending()
+  },
   methods: {
+    initPending() {
+      const pendingList = this.Sea.localStorage('pendingList')
+      if (pendingList) {
+        this.pendingList = pendingList
+      }
+    },
     formatDate(time) {
       return dayjs(time).format('YYYY/M/D Ah:m')
     },
@@ -279,7 +299,7 @@ export default {
       left: 12px;
       right: 12px;
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       color: #3179FF;
 
       .btn {
@@ -486,6 +506,11 @@ export default {
             font-weight: bold;
             margin-left: auto;
           }
+        }
+
+        .tx.pending {
+          cursor: not-allowed;
+          opacity: 0.6;
         }
 
         .tx.in {

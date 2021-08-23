@@ -22,6 +22,7 @@
         <el-input
           v-model="form.amount"
           type="number"
+          :disabled="balance === ''"
           :readonly="loading"
           placeholder="0"
         ></el-input>
@@ -29,12 +30,7 @@
       <div class="balance fee">{{ fee }} {{ asset.symbol }}</div>
       <el-form-item :label="'手续费'"></el-form-item>
     </el-form>
-    <el-button
-      type="primary"
-      :loading="loading && !balance"
-      class="send"
-      @click="bindSend"
-    >
+    <el-button type="primary" :loading="loading" class="send" @click="bindSend">
       发送
     </el-button>
   </div>
@@ -46,7 +42,6 @@ import PWCore, {
   Address,
   AddressType,
   Amount,
-  Builder,
   normalizers,
   SerializeWitnessArgs,
   transformers,
@@ -104,8 +99,7 @@ export default {
       },
       loading: false,
       form: {
-        address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47v656967xywaf26kphp033cn2tl6qn852gc7jzch',
+        address: '',
         amount: '',
       },
       fee: '0.00001551',
@@ -138,9 +132,22 @@ export default {
     },
   },
   mounted() {
+    if (this.balance) {
+      this.loading = false
+    }
     const ret = this.Sea.json(this.$route.query.unipass_ret)
-    if (ret && ret.info === 'sign success') {
-      this.sendNext(ret.data.sig)
+    if (ret) {
+      if (ret.info === 'sign success') {
+        this.sendNext(ret.data.sig)
+      } else if (ret.info === 'sign fail') {
+        this.$message.error('拒绝签名')
+      } else if (ret.info === 'sign fail') {
+        this.$message.error('拒绝签名')
+      } else if (ret.info === 'pubkey not match') {
+        this.$message.error('公钥不匹配')
+      } else {
+        this.Sea.params('unipass_ret', '')
+      }
     }
   },
   methods: {
@@ -154,23 +161,32 @@ export default {
       return tx
     },
     bindSend() {
+      this.loading = true
       this.$refs.form.validate((ok) => {
         if (ok) {
           this.send()
+        } else {
+          this.loading = false
         }
       })
     },
     async send() {
       try {
         const { address, amount } = this.form
-        this.loading = true
         const tx = await this.buildTx(address, amount)
         const signer = new UnipassSigner(PWCore.provider)
         const messages = signer.toMessages(tx)
         const message = messages[0].message
         const pubkey = this.provider.pubkey
         const txObj = transformers.TransformTransaction(tx)
-        this.Sea.localStorage('signData', { txObj })
+        this.Sea.localStorage('signData', {
+          txObj,
+          pending: {
+            from: this.provider.address,
+            to: address,
+            amount: new Amount(amount).toHexString(),
+          },
+        })
         this.sign(message, pubkey)
       } catch (error) {
         this.$message.error(error.message)
@@ -186,8 +202,8 @@ export default {
       window.location.replace(url.href)
     },
     async sendNext(sig) {
+      this.loading = true
       try {
-        this.loading = true
         const witness = new Reader(
           SerializeWitnessArgs(
             normalizers.NormalizeWitnessArgs({
@@ -197,13 +213,31 @@ export default {
             }),
           ),
         ).serializeJson()
-        const { txObj } = this.Sea.localStorage('signData')
+        const { txObj, pending } = this.Sea.localStorage('signData')
         txObj.witnesses[0] = witness
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
         const txHash = await rpc.send_transaction(txObj)
         console.log(`https://explorer.nervos.org/aggron/transaction/${txHash}`)
         this.$message.success('发送成功')
+        const pendingList = this.Sea.localStorage('pendingList') || []
+        pendingList.push({
+          // id: 8742876,
+          hash: txHash,
+          time: Date.now(),
+          token: 'CKB',
+          from: pending.from,
+          to: pending.to,
+          type: 'pending',
+          amount: pending.amount,
+          fee: 1551,
+          direction: 'out',
+          // blockNumber: 2538481,
+          // inputSize: 1,
+          // outputSize: 2,
+          // remark: '',
+        })
+        this.Sea.localStorage('pendingList', pendingList)
       } catch (error) {
         this.$message.error(error.message)
         console.error('error', error.message)
