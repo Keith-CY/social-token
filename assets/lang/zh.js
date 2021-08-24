@@ -12,6 +12,10 @@ module.exports = {
       title: 'UniPass 公众号',
       scan: '微信扫一扫关注公众号',
     },
+    qrcode: {
+      UniPassAddress: 'UniPass 接收地址',
+      CopySuccess: '复制成功',
+    },
   },
   index: {
     title: 'UniPass 代币',

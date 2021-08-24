@@ -376,6 +376,16 @@ a {
   opacity: 0;
 }
 
+.el-message-box {
+  .el-message-box__btns {
+    .el-button {
+      height: auto;
+      border-radius: 4px !important;
+      font-size: initial !important;
+      font-weight: normal !important;
+    }
+  }
+}
 // mobile css
 @media (max-width: 500px) {
   .el-message {

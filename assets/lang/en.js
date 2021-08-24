@@ -12,6 +12,10 @@ module.exports = {
       title: 'UniPass Wechat',
       scan: 'Follow the Wechat official account',
     },
+    qrcode: {
+      UniPassAddress: 'Unipass Address',
+      CopySuccess: 'Copied',
+    },
   },
   index: {
     title: 'UniPass Token',

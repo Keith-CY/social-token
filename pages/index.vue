@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="bottom">
-        <div class="left">
+        <div class="left" @click="showQRCode = true">
           <img class="qrcode" src="~/assets/img/home/qrcode.svg" />
         </div>
       </div>
@@ -35,11 +35,22 @@
         </nuxt-link>
       </template>
     </div>
+    <Qrcode :show.sync="showQRCode" :address="address" />
   </div>
 </template>
 <script>
+import Qrcode from '~/components/qrcode.vue'
 export default {
+  components: { Qrcode },
+  data() {
+    return {
+      showQRCode: false,
+    }
+  },
   computed: {
+    address() {
+      return this.$store.state.provider.address
+    },
     provider() {
       return this.$store.state.provider
     },

@@ -13,7 +13,7 @@
         <div class="right">{{ balance }}</div>
       </div>
       <div class="bottom">
-        <div class="btn left">
+        <div class="btn left" @click="showQRCode = true">
           <span>收款</span>
           <img src="~/assets/img/asset/qrcode.svg" />
         </div>
@@ -96,26 +96,33 @@
         </div>
       </el-tab-pane>
     </el-tabs>
+    <Qrcode :show.sync="showQRCode" :address="address" />
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import { Amount, AmountUnit } from '@lay2/pw-core'
+import Qrcode from '~/components/qrcode.vue'
 dayjs.locale('zh-cn')
 export default {
+  components: { Qrcode },
   data() {
     return {
       direction: 'all',
       txList: [],
       pendingList: [],
       loading: false,
+      showQRCode: false,
       hasMore: true,
       size: 10,
       activeTab: 'record',
     }
   },
   computed: {
+    address() {
+      return this.$store.state.provider.address
+    },
     formatTxList() {
       if (this.direction === 'in') {
         return this.txList
