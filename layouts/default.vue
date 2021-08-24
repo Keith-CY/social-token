@@ -85,7 +85,7 @@ export default {
     },
     async loadAssets(addressHash) {
       const res = await this.$axios({
-        url: 'https://cellapitest.ckb.pw/cell/assets',
+        url: '/cell/assets',
         params: {
           lockHash: addressHash,
         },

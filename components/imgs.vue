@@ -7,9 +7,8 @@
     :style="style"
     v-bind="$attrs"
     v-on="$listeners"
-    ><div slot="error" class="error-slot">
-      <img src="~/assets/img/image-fail.svg" /></div
-  ></el-image>
+    ><img slot="error" class="error-slot" src="~/assets/img/image-fail.svg"
+  /></el-image>
 </template>
 <script>
 export default {
@@ -59,13 +58,10 @@ export default {
 <style lang="stylus">
 .imgs {
   .error-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      width: 40px;
-    }
+    max-width: 40px;
+    width: 100%;
+    height: 100%;
+    max-height: 40px;
   }
 }
 

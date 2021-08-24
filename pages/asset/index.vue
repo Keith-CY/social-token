@@ -4,7 +4,7 @@
       <img class="bg" src="~/assets/img/home/info-card-blur.svg" />
       <div class="top">
         <div class="left">
-          <img class="icon" :src="asset.icon" />
+          <imgs class="icon" :src="asset.icon" />
           <div class="info">
             <div class="symbol">{{ asset.symbol }}</div>
             <div class="name">{{ asset.name }}</div>
@@ -124,10 +124,27 @@ export default {
       return this.$store.state.provider.address
     },
     formatTxList() {
+      if (this.txList.length === 0) {
+        return this.pendingList
+      }
       if (this.direction === 'in') {
         return this.txList
       } else {
-        const all = this.pendingList.concat(this.txList)
+        const pendingList = []
+        for (let i = 0; i < this.pendingList.length; i++) {
+          const pending = this.pendingList[i]
+          const mins = dayjs().diff(dayjs(pending.time), 'minute')
+          // pending 小于十分钟
+          if (mins < 10) {
+            const index = this.txList.findIndex((e) => e.hash === pending.hash)
+            // 未上链
+            if (index === -1) {
+              pendingList.push(pending)
+            }
+          }
+        }
+        this.Sea.localStorage('pendingList', pendingList)
+        const all = pendingList.concat(this.txList)
         return all
       }
     },
@@ -232,7 +249,7 @@ export default {
       }
       this.loading = true
       const res = await this.$axios({
-        url: 'https://cellapitest.ckb.pw/cell/txListV2',
+        url: '/cell/txListV2',
         params: {
           lockHash: this.lockHash,
           typeHash: '',
@@ -257,6 +274,48 @@ export default {
         this.$message.error('请求失败')
       }
     },
+    async refreshTxRecords() {
+      const res = await this.$axios({
+        url: '/cell/txListV2',
+        params: {
+          lockHash: this.lockHash,
+          typeHash: '',
+          lastTxId: '9999999999',
+          size: this.size,
+          direction: this.direction,
+        },
+      })
+      if (res.code === 200) {
+        const pendingList = this.Sea.localStorage('pendingList')
+        if (pendingList) {
+          for (let i = 0; i < this.pendingList.length; i++) {
+            const pending = this.pendingList[i]
+            const index = res.data.findIndex((e) => e.hash === pending.hash)
+            // 已上链
+            if (index !== -1) {
+              this.loadTxRecords()
+            }
+          }
+        }
+      }
+    },
+  },
+  sockets: {
+    connect() {
+      // console.log('socket-connect')
+    },
+    newBlock() {
+      this.refreshTxRecords()
+    },
+    newTx() {
+      // console.log('socket-newTx', data)
+    },
+    disconnect() {
+      // console.log('socket-disconnect')
+    },
+    reconnect() {
+      this.$socket.emit('connect')
+    },
   },
 }
 </script>
@@ -265,7 +324,7 @@ export default {
   .info-card {
     margin-top: 30px;
     display: flex;
-    width: 100%;
+    min-width: 100%;
     min-height: 168px;
     position: relative;
     color: white;
@@ -293,7 +352,7 @@ export default {
           padding: 9px;
           background: white;
           border-radius: 10px;
-          border: 1px solid #E9F0FF;
+          // border: 1px solid #E9F0FF;
         }
 
         .info {
