@@ -26,6 +26,8 @@ const uploadFile = (src, dist) => {
     })
     .catch(() => {
       console.log('上传失败', src)
+      // console.log('上传失败，再次上传', src)
+      // uploadFile(src, dist)
     })
 }
 // 上传目录 src = 本地路径, dist 云端目录

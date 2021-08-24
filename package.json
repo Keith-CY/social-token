@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@nervosnetwork/ckb-sdk-utils": "^0.41.1",
-    "@nuxt/content": "^1.14.0",
     "@nuxtjs/axios": "^5.13.1",
     "@nuxtjs/google-gtag": "^1.0.4",
     "@nuxtjs/pwa": "^3.3.5",

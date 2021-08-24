@@ -19,7 +19,6 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       // "@nuxtjs/sentry",
-      // "@nuxt/content",
       "@types/node"
     ]
   },

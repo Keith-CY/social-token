@@ -1,5 +1,3 @@
-// import path from 'path'
-// import fs from 'fs'
 export default {
   // Target: https://go.nuxtjs.dev/config-target
   target: 'static',
@@ -16,13 +14,7 @@ export default {
       },
       { hid: 'description', name: 'description', content: '' },
     ],
-    link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      // {
-      //   rel: 'stylesheet',
-      //   href: 'https://cdn.jsdelivr.net/npm/normalize.css@latest/normalize.min.css',
-      // },
-    ],
+    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
     script: [
       {
         src: 'https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js',
@@ -77,8 +69,6 @@ export default {
     '@nuxtjs/axios',
     // https://go.nuxtjs.dev/pwa
     // '@nuxtjs/pwa',
-    // https://go.nuxtjs.dev/content
-    // '@nuxt/content',
     // '@nuxtjs/sentry',
   ],
 
@@ -138,11 +128,6 @@ export default {
 
   // server
   server: {
-    // host: '0.0.0.0',
     port: 5003,
-    // https: {
-    //   key: fs.readFileSync(path.resolve(__dirname, 'bin/cert.key')),
-    //   cert: fs.readFileSync(path.resolve(__dirname, 'bin/cert.crt')),
-    // },
   },
 }
