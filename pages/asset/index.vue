@@ -23,7 +23,7 @@
         </div>
       </div>
     </div>
-    <el-tabs v-model="activeTab" class="tabs" @tab-click="bindTab">
+    <el-tabs v-model="activeTab" class="tabs">
       <el-tab-pane class="token" label="代币详情" name="token">
         <div class="user">
           <img class="avatar" src="~/assets/img/home/avatar.png" />
@@ -76,6 +76,7 @@
             :key="i"
             class="tx"
             :class="[formatState(tx), tx.type]"
+            @click="bindTx(tx)"
           >
             <imgs
               class="state"
@@ -97,6 +98,7 @@
       </el-tab-pane>
     </el-tabs>
     <Qrcode :show.sync="showQRCode" :address="address" />
+    <TxItem :show.sync="showTxItem" :tx="itemTx" />
   </div>
 </template>
 <script>
@@ -104,9 +106,11 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import { Amount, AmountUnit } from '@lay2/pw-core'
 import Qrcode from '~/components/qrcode.vue'
+import TxItem from '~/components/tx.vue'
 dayjs.locale('zh-cn')
 export default {
-  components: { Qrcode },
+  name: 'Asset',
+  components: { Qrcode, TxItem },
   data() {
     return {
       direction: 'all',
@@ -114,9 +118,11 @@ export default {
       pendingList: [],
       loading: false,
       showQRCode: false,
+      showTxItem: false,
       hasMore: true,
       size: 10,
       activeTab: 'record',
+      itemTx: {},
     }
   },
   computed: {
@@ -232,7 +238,10 @@ export default {
         query: this.$route.query,
       })
     },
-    bindTab() {},
+    bindTx(tx) {
+      this.itemTx = tx
+      this.showTxItem = true
+    },
     bindMore() {
       const last = this.txList.slice(-1)[0]
       if (last) {
@@ -548,6 +557,8 @@ export default {
         min-height: 200px;
 
         .tx {
+          border-radius: 4px;
+          cursor: pointer;
           margin-top: 10px;
           height: 68px;
           display: flex;
@@ -582,6 +593,10 @@ export default {
             font-weight: bold;
             margin-left: auto;
           }
+        }
+
+        .tx:hover {
+          background: #f6f7fb;
         }
 
         .tx.pending {
