@@ -145,6 +145,14 @@ export default {
       }
       return ''
     },
+    lockHash() {
+      return this.$store.state.lockHash
+    },
+  },
+  watch: {
+    '$store.state.lockHash'() {
+      this.loadTxRecords()
+    },
   },
   created() {
     const name = this.$route.query.name
@@ -201,13 +209,25 @@ export default {
       })
     },
     bindTab() {},
+    bindMore() {
+      const last = this.txList.slice(-1)[0]
+      if (last) {
+        this.loadTxRecords(last.id)
+      }
+    },
+    bindDirection() {
+      this.txList = []
+      this.loadTxRecords()
+    },
     async loadTxRecords(lastTxId) {
+      if (!this.lockHash) {
+        return
+      }
       this.loading = true
       const res = await this.$axios({
         url: 'https://cellapitest.ckb.pw/cell/txListV2',
         params: {
-          lockHash:
-            '0x470f26230dcc6df009ee66d45c7cbf3bb4791a52353cbce86ed5b488a73711e9',
+          lockHash: this.lockHash,
           typeHash: '',
           lastTxId: lastTxId || '9999999999',
           size: this.size,
@@ -229,16 +249,6 @@ export default {
       } else {
         this.$message.error('请求失败')
       }
-    },
-    bindMore() {
-      const last = this.txList.slice(-1)[0]
-      if (last) {
-        this.loadTxRecords(last.id)
-      }
-    },
-    bindDirection() {
-      this.txList = []
-      this.loadTxRecords()
     },
   },
 }

@@ -38,12 +38,10 @@ export default {
   },
   methods: {
     reload() {
-      this.refresh = true
       this.Sea.localStorage('provider', '')
-      this.$store.commit('reload')
-      this.$nextTick(() => {
-        this.init()
-      })
+      this.Sea.localStorage('pendingList', '')
+      this.Sea.localStorage('signData', '')
+      window.location.reload()
     },
     t_(key) {
       return this.$t('default.' + key)
@@ -82,6 +80,7 @@ export default {
         url.CHAIN_ID,
       )
       const addressHash = PWCore.provider.address.toLockScript().toHash()
+      this.$store.state.lockHash = addressHash
       this.loadAssets(addressHash)
     },
     async loadAssets(addressHash) {

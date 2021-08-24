@@ -6,6 +6,7 @@ const initState = {
     address: '',
   },
   assets: [],
+  lockHash: '',
 }
 const sotre = {
   // 严格模式

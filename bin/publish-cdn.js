@@ -18,16 +18,21 @@ const client = new OSS({
   bucket: process.env.OSS_BUCKET,
 })
 // 上传文件 src = 本地路径 dist = 云端路径
-const uploadFile = (src, dist) => {
+let success = 0
+const uploadFile = (src, dist, doc) => {
   client
     .put(dist, src)
     .then((res) => {
+      success += 1
       console.log('上传成功', res.name)
     })
     .catch(() => {
-      console.log('上传失败', src)
-      // console.log('上传失败，再次上传', src)
-      // uploadFile(src, dist)
+      if (success > 1) {
+        console.log('上传失败，再次上传', doc)
+        uploadFile(src, dist)
+      } else {
+        console.log('上传失败', doc)
+      }
     })
 }
 // 上传目录 src = 本地路径, dist 云端目录
@@ -43,7 +48,7 @@ const uploaDirectory = (src, dist) => {
     const st = fs.statSync(_src)
     // 判断是否为文件
     if (st.isFile() && !['.DS_Store', '.nojekyll'].includes(doc)) {
-      uploadFile(_src, _dist)
+      uploadFile(_src, _dist, doc)
     } else if (st.isDirectory()) {
       // 如果是目录则递归调用自身
       uploaDirectory(_src, _dist)
