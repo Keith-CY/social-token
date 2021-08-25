@@ -26,38 +26,50 @@
     <el-tabs v-model="activeTab" class="tabs">
       <el-tab-pane class="token" label="代币详情" name="token">
         <div class="user">
-          <img class="avatar" src="~/assets/img/home/avatar.png" />
-          <div class="name">Andy Warhol</div>
+          <imgs class="avatar" :src="asset.issuerIcon" />
+          <div class="name">{{ asset.issuerName || '-' }}</div>
           <div class="publisher sea-colorful-border">发行人</div>
         </div>
         <div class="introduction">
-          Helen Kennedy aka ZazzCorp an artist illustrator with an obsession for
-          drawing skulls. The Zazz Corp motto Design for Weirdos" embodies the
-          strange, far out, and weird.
+          {{ asset.issuerInfo || '-' }}
         </div>
         <div class="token-info">
           <div class="info">
             <div class="left">代币总量：</div>
-            <div class="right">45,100,000.1234</div>
+            <div class="right">{{ asset.supply || '-' }}</div>
           </div>
           <div class="info">
             <div class="left">流通量：</div>
-            <div class="right">100,000.1234</div>
+            <div class="right">{{ asset.circulatingSupply || '-' }}</div>
           </div>
           <div class="info">
             <div class="left">发行日期：</div>
-            <div class="right">2021-8-17</div>
+            <div class="right">
+              {{ asset.issueDate || '-' }}
+            </div>
           </div>
-          <div class="info">
+          <div v-if="asset.issuerSocialInfo" class="info">
             <div class="left">社交方式：</div>
             <div class="right">
-              <a href="http://unipass.xyz" target="_blank">
+              <a
+                v-if="asset.issuerSocialInfo.Github"
+                :href="asset.issuerSocialInfo.Github"
+                target="_blank"
+              >
                 <img class="icon" src="~/assets/img/asset/github.svg" />
               </a>
-              <a href="http://unipass.xyz" target="_blank">
+              <a
+                v-if="asset.issuerSocialInfo.Facebook"
+                :href="asset.issuerSocialInfo.Facebook"
+                target="_blank"
+              >
                 <img class="icon" src="~/assets/img/asset/facebook.svg" />
               </a>
-              <a href="http://unipass.xyz" target="_blank">
+              <a
+                v-if="asset.issuerSocialInfo.Twitter"
+                :href="asset.issuerSocialInfo.Twitter"
+                target="_blank"
+              >
                 <img class="icon" src="~/assets/img/asset/twitter.svg" />
               </a>
             </div>
@@ -86,7 +98,9 @@
               <div class="address">
                 {{ formatAddress(tx.from) }}
               </div>
-              <div class="time">{{ formatDate(tx.time) }}</div>
+              <div class="time">
+                {{ dayjs(tx.time).format('YYYY/M/D Ah:m') }}
+              </div>
             </div>
             <div class="balance">{{ formatBalance(tx) }}</div>
           </div>
@@ -215,14 +229,12 @@ export default {
     this.initPending()
   },
   methods: {
+    dayjs,
     initPending() {
       const pendingListCKB = this.Sea.localStorage('pendingListCKB')
       if (pendingListCKB) {
         this.pendingListCKB = pendingListCKB
       }
-    },
-    formatDate(time) {
-      return dayjs(time).format('YYYY/M/D Ah:m')
     },
     formatBalance(tx) {
       const asset = this.asset
