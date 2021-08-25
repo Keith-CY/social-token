@@ -27,33 +27,33 @@
       <el-tab-pane class="token" label="代币详情" name="token">
         <div class="user">
           <imgs class="avatar" :src="asset.issuerIcon" />
-          <div class="name">{{ asset.issuerName || '-' }}</div>
+          <div class="name">{{ asset.issuerName }}</div>
           <div class="publisher sea-colorful-border">发行人</div>
         </div>
         <div class="introduction">
-          {{ asset.issuerInfo || '-' }}
+          {{ asset.issuerInfo }}
         </div>
         <div class="token-info">
           <div class="info">
             <div class="left">代币总量：</div>
-            <div class="right">{{ asset.supply || '-' }}</div>
+            <div class="right">{{ asset.supply }}</div>
           </div>
           <div class="info">
             <div class="left">流通量：</div>
-            <div class="right">{{ asset.circulatingSupply || '-' }}</div>
+            <div class="right">{{ asset.circulatingSupply }}</div>
           </div>
           <div class="info">
             <div class="left">发行日期：</div>
             <div class="right">
-              {{ asset.issueDate || '-' }}
+              {{ dayjs(asset.issueDate).format('YYYY-M-D') }}
             </div>
           </div>
           <div v-if="asset.issuerSocialInfo" class="info">
             <div class="left">社交方式：</div>
             <div class="right">
               <a
-                v-if="asset.issuerSocialInfo.Github"
-                :href="asset.issuerSocialInfo.Github"
+                v-if="asset.issuerSocialInfo.github"
+                :href="asset.issuerSocialInfo.github"
                 target="_blank"
               >
                 <img class="icon" src="~/assets/img/asset/github.svg" />
@@ -66,8 +66,8 @@
                 <img class="icon" src="~/assets/img/asset/facebook.svg" />
               </a>
               <a
-                v-if="asset.issuerSocialInfo.Twitter"
-                :href="asset.issuerSocialInfo.Twitter"
+                v-if="asset.issuerSocialInfo.twitter"
+                :href="asset.issuerSocialInfo.twitter"
                 target="_blank"
               >
                 <img class="icon" src="~/assets/img/asset/twitter.svg" />
@@ -205,7 +205,14 @@ export default {
   },
   watch: {
     typeHash() {
-      this.loadTxRecords()
+      if (this.name === 'ST') {
+        this.loadTxRecords()
+      }
+    },
+    lockHash() {
+      if (this.name === 'CKB') {
+        this.loadTxRecords()
+      }
     },
   },
   created() {
@@ -279,7 +286,7 @@ export default {
       if (!this.lockHash) {
         return
       }
-      if (this.name === 'ST' && !this.typeHash) {
+      if (!this.typeHash && this.name === 'ST') {
         return
       }
       this.loading = true
@@ -562,6 +569,10 @@ export default {
           font-weight: bold;
           color: #333333;
           line-height: 20px;
+
+          .left {
+            flex-shrink: 0;
+          }
 
           .right {
             display: flex;
