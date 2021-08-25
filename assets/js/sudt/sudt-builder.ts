@@ -63,7 +63,7 @@ export class SUDTBuilder extends Builder {
     const receiverSUDTCells = await (
       this.collector as UnipassIndexerCollector
     ).collectSUDT(this.sudt, this.address, {
-      neededAmount: new Amount('1', AmountUnit.ckb),
+      neededAmount: new Amount('142', AmountUnit.ckb),
     })
     console.log('receiverSUDTCells', receiverSUDTCells)
     if (!receiverSUDTCells || receiverSUDTCells.length === 0) {
@@ -95,7 +95,6 @@ export class SUDTBuilder extends Builder {
       PWCore.provider.address,
       { neededAmount: this.amount },
     )
-    console.log('inputCells===for=====>', inputCells, inputCells.length)
 
     // First step: build a tx including sender and receiver sudt cell only
     for (const inputCell of unspentSUDTCells) {
@@ -121,6 +120,8 @@ export class SUDTBuilder extends Builder {
 
       if (senderInputSUDTSum.gte(this.amount)) break
     }
+    inputCells.push(receiverInputCell)
+    outputCells.unshift(receiverOuputCell)
 
     if (senderInputSUDTSum.lt(this.amount)) {
       throw new Error(
@@ -199,7 +200,6 @@ export class SUDTBuilder extends Builder {
     )
 
     this.fee = Builder.calcFee(tx, this.feeRate)
-    console.log('fee', this.fee)
     return tx
   }
 
