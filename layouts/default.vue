@@ -94,6 +94,9 @@ export default {
         const rawAssets = res.data.assets
         const assets = []
         for (const e of rawAssets) {
+          if (e.symbol === 'DAO') {
+            continue
+          }
           const capacity = new Amount(e.capacity, AmountUnit.shannon)
           let typeScript = null
           if (e.typeScript) {
