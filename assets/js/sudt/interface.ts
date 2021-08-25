@@ -1,5 +1,3 @@
-import { Message } from '@lay2/pw-core'
-
 export interface UnipassURLData {
   data: {
     email?: string
@@ -26,11 +24,6 @@ export interface PageState {
   action: ActionType
   data: PageData
   extraObj: string
-}
-
-export interface SendTxState {
-  txObj: any
-  messages: Message[]
 }
 
 export const KEY = 'unipass'

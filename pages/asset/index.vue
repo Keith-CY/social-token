@@ -116,7 +116,8 @@ export default {
       name: this.$route.query.name,
       direction: 'all',
       txList: [],
-      pendingList: [],
+      pendingListCKB: [],
+      pendingListST: [],
       loading: false,
       showQRCode: false,
       showTxItem: false,
@@ -132,26 +133,26 @@ export default {
     },
     formatTxList() {
       if (this.txList.length === 0) {
-        return this.pendingList
+        return this.pendingListCKB
       }
       if (this.direction === 'in') {
         return this.txList
       } else {
-        const pendingList = []
-        for (let i = 0; i < this.pendingList.length; i++) {
-          const pending = this.pendingList[i]
+        const pendingListCKB = []
+        for (let i = 0; i < this.pendingListCKB.length; i++) {
+          const pending = this.pendingListCKB[i]
           const mins = dayjs().diff(dayjs(pending.time), 'minute')
           // pending 小于十分钟
           if (mins < 10) {
             const index = this.txList.findIndex((e) => e.hash === pending.hash)
             // 未上链
             if (index === -1) {
-              pendingList.push(pending)
+              pendingListCKB.push(pending)
             }
           }
         }
-        this.Sea.localStorage('pendingList', pendingList)
-        const all = pendingList.concat(this.txList)
+        this.Sea.localStorage('pendingListCKB', pendingListCKB)
+        const all = pendingListCKB.concat(this.txList)
         return all
       }
     },
@@ -181,8 +182,10 @@ export default {
     typeHash() {
       if (this.name === 'CKB') {
         return ''
-      } else {
+      } else if (this.name === 'ST') {
         return this.asset.typeHash
+      } else {
+        return ''
       }
     },
   },
@@ -213,9 +216,9 @@ export default {
   },
   methods: {
     initPending() {
-      const pendingList = this.Sea.localStorage('pendingList')
-      if (pendingList) {
-        this.pendingList = pendingList
+      const pendingListCKB = this.Sea.localStorage('pendingListCKB')
+      if (pendingListCKB) {
+        this.pendingListCKB = pendingListCKB
       }
     },
     formatDate(time) {
@@ -264,6 +267,9 @@ export default {
       if (!this.lockHash) {
         return
       }
+      if (this.name === 'ST' && !this.typeHash) {
+        return
+      }
       this.loading = true
       const res = await this.$axios({
         url: '/cell/txListV2',
@@ -296,17 +302,17 @@ export default {
         url: '/cell/txListV2',
         params: {
           lockHash: this.lockHash,
-          typeHash: '',
+          typeHash: this.typeHash,
           lastTxId: '9999999999',
           size: this.size,
           direction: this.direction,
         },
       })
       if (res.code === 200) {
-        const pendingList = this.Sea.localStorage('pendingList')
-        if (pendingList) {
-          for (let i = 0; i < this.pendingList.length; i++) {
-            const pending = this.pendingList[i]
+        const pendingListCKB = this.Sea.localStorage('pendingListCKB')
+        if (pendingListCKB) {
+          for (let i = 0; i < this.pendingListCKB.length; i++) {
+            const pending = this.pendingListCKB[i]
             const index = res.data.findIndex((e) => e.hash === pending.hash)
             // 已上链
             if (index !== -1) {

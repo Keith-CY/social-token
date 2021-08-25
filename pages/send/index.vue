@@ -47,6 +47,10 @@ import PWCore, {
   transformers,
   AmountUnit,
 } from '@lay2/pw-core'
+import {
+  getUSDTSignMessage,
+  getSUDTSignCallback,
+} from '~/assets/js/sudt/sudt-tranfer'
 import { getCkbEnv } from '~/assets/js/config'
 import UnipassBuilder from '~/assets/js/UnipassBuilder.ts'
 import UnipassSigner from '~/assets/js/UnipassSigner.ts'
@@ -155,6 +159,9 @@ export default {
         return this.asset.typeHash
       }
     },
+    sudtTokenId() {
+      return this.asset.typeScript.args
+    },
   },
   mounted() {
     if (this.balance) {
@@ -163,7 +170,14 @@ export default {
     const ret = this.Sea.json(this.$route.query.unipass_ret)
     if (ret) {
       if (ret.info === 'sign success') {
-        this.sendNext(ret.data.sig)
+        const name = this.name
+        if (name === 'CKB') {
+          this.sendCKBNext(ret.data.sig)
+        } else if (name === 'ST') {
+          this.sendSTNext(ret.data.sig)
+        } else {
+          this.$message.error('未知资产')
+        }
       } else if (ret.info === 'sign fail') {
         this.$message.error('拒绝签名')
       } else if (ret.info === 'sign fail') {
@@ -197,10 +211,12 @@ export default {
     },
     async sendST() {
       // check
-      const { address } = this.form
-      if (address === this.provider.address) {
+      const provider = this.provider
+      const { address, amount } = this.form
+      if (address === provider.address) {
         this.$message.error('收款地址不能为自己')
         this.loading = false
+        return
       }
       const lockHash = new Address(address, AddressType.ckb)
         .toLockScript()
@@ -216,8 +232,23 @@ export default {
       if (res.data.length === 0) {
         this.$message.error('对方地址没有能接收的 SUDT，暂时无法转账')
         this.loading = false
+        return
       }
-      // send st
+      // send
+      try {
+        const { message, txObj } = await getUSDTSignMessage(
+          this.sudtTokenId,
+          address,
+          amount,
+          provider.pubkey,
+        )
+        this.Sea.localStorage('signData', { txObj, message })
+        this.sign(message, provider.pubkey)
+      } catch (error) {
+        this.loading = false
+        console.error(error.message)
+        this.$message.error(error.message)
+      }
     },
     send() {
       if (this.name === 'ST') {
@@ -226,7 +257,7 @@ export default {
         this.sendCKB()
       }
     },
-    sendCKB() {
+    async sendCKB() {
       try {
         const { address, amount } = this.form
         const tx = await this.buildTx(address, amount)
@@ -257,7 +288,7 @@ export default {
       url.searchParams.set('pubkey', pubkey)
       window.location.replace(url.href)
     },
-    async sendNext(sig) {
+    async sendCKBNext(sig) {
       this.loading = true
       try {
         const witness = new Reader(
@@ -275,9 +306,8 @@ export default {
         const rpc = new RPC(url.NODE_URL)
         const txHash = await rpc.send_transaction(txObj)
         this.$message.success('发送成功')
-        const pendingList = this.Sea.localStorage('pendingList') || []
-        pendingList.push({
-          // id: 8742876,
+        const pendingListCKB = this.Sea.localStorage('pendingListCKB') || []
+        pendingListCKB.push({
           hash: txHash,
           time: Date.now(),
           token: 'CKB',
@@ -287,12 +317,41 @@ export default {
           amount: pending.amount,
           fee: 1551,
           direction: 'out',
-          // blockNumber: 2538481,
-          // inputSize: 1,
-          // outputSize: 2,
-          // remark: '',
         })
-        this.Sea.localStorage('pendingList', pendingList)
+        this.Sea.localStorage('pendingListCKB', pendingListCKB)
+      } catch (error) {
+        this.$message.error(error.message)
+        console.error('error', error.message)
+      }
+      this.Sea.params('unipass_ret', '')
+      this.loading = false
+    },
+    async sendSTNext(sig) {
+      try {
+        this.loading = true
+        const { txObj } = this.Sea.localStorage('signData')
+        const txhash = await getSUDTSignCallback(sig, txObj)
+        this.$message.success('发送成功')
+        console.log('txhash', txhash)
+        // pending list
+        // const pendingListST = this.Sea.localStorage('pendingListST') || []
+        // pendingListST.push({
+        //   // id: 8742876,
+        //   hash: txHash,
+        //   time: Date.now(),
+        //   token: 'CKB',
+        //   from: pending.from,
+        //   to: pending.to,
+        //   type: 'pending',
+        //   amount: pending.amount,
+        //   fee: 1551,
+        //   direction: 'out',
+        //   // blockNumber: 2538481,
+        //   // inputSize: 1,
+        //   // outputSize: 2,
+        //   // remark: '',
+        // })
+        // this.Sea.localStorage('pendingListST', pendingListST)
       } catch (error) {
         this.$message.error(error.message)
         console.error('error', error.message)

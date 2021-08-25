@@ -155,6 +155,11 @@ a {
       line-height: 20px;
     }
   }
+  .el-form-item.is-required {
+    .el-form-item__label:before {
+      content: '' !important;
+    }
+  }
 }
 // el-input
 .el-input {

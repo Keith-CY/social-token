@@ -39,7 +39,8 @@ export default {
   methods: {
     reload() {
       this.Sea.localStorage('provider', '')
-      this.Sea.localStorage('pendingList', '')
+      this.Sea.localStorage('pendingListCKB', '')
+      this.Sea.localStorage('pendingListST', '')
       this.Sea.localStorage('signData', '')
       window.location.reload()
     },
