@@ -1,5 +1,5 @@
 import { Address, AddressType } from '@lay2/pw-core'
-import { getAddressByPubkey } from '../utils/utils'
+import { getAddress } from '../unipass'
 import {
   ActionType,
   PageData,
@@ -81,7 +81,7 @@ export function getDataFromUrl(action: number) {
 
   if (unipassData.code === 200) {
     if (unipassData.data.pubkey) {
-      const ckbAddress = getAddressByPubkey(unipassData.data.pubkey)
+      const ckbAddress = getAddress(unipassData.data.pubkey)
       let pageState = JSON.parse(getData(PAGESTATE)) as PageState
       if (pageState) {
         pageState.data.signature = unipassData.data.sig as string

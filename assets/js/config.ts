@@ -78,23 +78,15 @@ const mainCKB = {
   CHAIN_ID: ChainID.ckb,
 }
 
-export function saveEnvData(url: string) {
-  if (url === 'https://rc.unipass.xyz' || url === 'https://unipass.xyz') {
-    window.localStorage.setItem('lina', JSON.stringify(true))
-  } else {
-    window.localStorage.removeItem('lina')
-  }
-}
-
 export function getCkbEnv(): Url {
-  const isLina = window.localStorage.getItem('lina')
+  const isLina = process.env.CKB_CHAIN_ID === '0'
   let data = testCKB
   if (isLina) data = mainCKB
   return data
 }
 
 export function getCellDeps(): CellDep[] {
-  const isLina = window.localStorage.getItem('lina')
+  const isLina = process.env.CKB_CHAIN_ID === '0'
   let data = AggronCellDeps
   if (isLina) data = LinaCellDeps
   return data

@@ -1,15 +1,19 @@
+import { CellDep } from '@lay2/pw-core'
+import axios from 'axios'
 import {
   AddressPrefix,
   AddressType,
   fullPayloadToAddress,
 } from '@nervosnetwork/ckb-sdk-utils'
-// import { CKBHasher } from './crypto'
 const blake2b = require('blake2b')
 const buf2hex = function (buffer: ArrayBufferLike) {
-  // buffer is an ArrayBuffer
   return [...new Uint8Array(buffer)]
     .map((x) => x.toString(16).padStart(2, '0'))
     .join('')
+}
+interface CellDepApi {
+  data: CellDep[]
+  code: number
 }
 export class CKBHasher {
   hasher: any
@@ -64,4 +68,18 @@ export const getAddress = (masterKey: string) => {
   })
 
   return address
+}
+
+export async function getUnipassCellDeps(): Promise<CellDep[]> {
+  const url = process.env.CELL_DEPS_API as string
+  const params = [
+    {
+      codeHash: process.env.UNIPASS_TYPE_ID,
+      hashType: 'type',
+      args: '0x',
+    },
+  ]
+  const ret = await axios.post(url, params)
+  const data = ret.data as CellDepApi
+  return data.data
 }

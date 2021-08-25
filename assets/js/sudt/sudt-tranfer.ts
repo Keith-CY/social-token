@@ -12,7 +12,7 @@ import {
   transformers,
   WitnessArgs,
 } from '@lay2/pw-core'
-import { getUnipassCellDeps } from '../utils/cell-deps-api'
+import { getUnipassCellDeps } from '../unipass'
 import UnipassSigner from '../UnipassSigner'
 import { SendTxState } from '../url/interface'
 import { SUDTBuilder } from './sudt-builder'

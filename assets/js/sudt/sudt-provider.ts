@@ -1,10 +1,10 @@
 import { Provider, Platform, AddressType, Address } from '@lay2/pw-core'
-import { getAddressByPubkey } from '../utils/utils'
+import { getAddress } from '../unipass'
 
 export class UsdtProvider extends Provider {
   constructor(private readonly masterPubkey: string) {
     super(Platform.ckb)
-    const addressStr = getAddressByPubkey(this.masterPubkey)
+    const addressStr = getAddress(this.masterPubkey)
     console.log('this.masterPubkey', this.masterPubkey)
     this.address = new Address(addressStr, AddressType.ckb)
   }
