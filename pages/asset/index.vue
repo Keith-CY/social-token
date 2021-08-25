@@ -604,18 +604,6 @@ export default {
           opacity: 0.6;
         }
 
-        .tx.in {
-          .balance {
-            color: var(--primary);
-          }
-        }
-
-        .tx.out {
-          .balance {
-            color: #FFA71A;
-          }
-        }
-
         .more {
           text-align: center;
           margin: 10px 0;
