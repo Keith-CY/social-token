@@ -225,11 +225,7 @@ export default {
       const asset = this.asset
       let string = ''
       const balance = new Amount(tx.amount, AmountUnit.shannon)
-      if (this.name === 'CKB') {
-        string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
-      } else if (this.name === 'ST') {
-        string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
-      }
+      string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
       const op = tx.direction === 'out' ? '-' : '+'
       return op + string
     },

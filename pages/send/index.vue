@@ -9,7 +9,7 @@
     >
       <el-form-item :label="'收款地址'" prop="address">
         <el-input
-          v-model="form.address"
+          v-model.trim="form.address"
           type="textarea"
           placeholder="地址格式: CKB / ETH / ENS"
           resize="none"
@@ -20,7 +20,7 @@
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
       <el-form-item :label="'金额'" prop="amount">
         <el-input
-          v-model="form.amount"
+          v-model.trim="form.amount"
           type="number"
           :disabled="balance === ''"
           :readonly="loading"
@@ -45,12 +45,14 @@ import PWCore, {
   normalizers,
   SerializeWitnessArgs,
   transformers,
+  AmountUnit,
 } from '@lay2/pw-core'
 import { getCkbEnv } from '~/assets/js/config'
 import UnipassBuilder from '~/assets/js/UnipassBuilder.ts'
 import UnipassSigner from '~/assets/js/UnipassSigner.ts'
 export default {
   data() {
+    const name = this.$route.query.name
     const checkAddress = (_rule, value, callback) => {
       try {
         if (value.startsWith('ckb') || value.startsWith('ckt')) {
@@ -69,20 +71,34 @@ export default {
       }
     }
     const checkAmount = (_rule, value, callback) => {
-      try {
-        const amount = new Amount(value)
-        if (amount.lt(new Amount('61'))) {
-          callback(new Error('最小金额为 61 CKB'))
+      if (name === 'CKB') {
+        try {
+          const amount = new Amount(value)
+          if (amount.lt(new Amount('61'))) {
+            callback(new Error('最小金额为 61 CKB'))
+            return
+          }
+          const asset = this.asset
+          if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
+            callback(new Error('转账金额必须小于余额'))
+            return
+          }
+        } catch (error) {
+          callback(new Error(error.message))
           return
         }
-        const asset = this.asset
-        if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
-          callback(new Error('转账金额必须小于余额'))
+      } else if (name === 'ST') {
+        try {
+          const amount = new Amount(value, AmountUnit.shannon)
+          const asset = this.asset
+          if (amount.gt(Amount.ZERO) && amount.gt(asset.sudtAmount)) {
+            callback(new Error('转账金额必须小于余额'))
+            return
+          }
+        } catch (error) {
+          callback(new Error(error.message))
           return
         }
-      } catch (error) {
-        callback(new Error(error.message))
-        return
       }
       callback()
     }
@@ -99,10 +115,12 @@ export default {
       },
       loading: false,
       form: {
-        address: '',
+        address:
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47d2pxgpmm7c0ds5emzj7nc4e9zdgwzuw65stdl58',
         amount: '',
       },
       fee: '0.00001551',
+      name,
     }
   },
   computed: {
@@ -129,6 +147,13 @@ export default {
         })
       }
       return ''
+    },
+    typeHash() {
+      if (this.name === 'CKB') {
+        return ''
+      } else {
+        return this.asset.typeHash
+      }
     },
   },
   mounted() {
@@ -170,7 +195,38 @@ export default {
         }
       })
     },
-    async send() {
+    async sendST() {
+      // check
+      const { address } = this.form
+      if (address === this.provider.address) {
+        this.$message.error('收款地址不能为自己')
+        this.loading = false
+      }
+      const lockHash = new Address(address, AddressType.ckb)
+        .toLockScript()
+        .toHash()
+      const res = await this.$axios({
+        url: '/cell/unSpent',
+        params: {
+          lockHash,
+          typeHash: this.typeHash,
+          capacity: new Amount('1', AmountUnit.shannon).toHexString(),
+        },
+      })
+      if (res.data.length === 0) {
+        this.$message.error('对方地址没有能接收的 SUDT，暂时无法转账')
+        this.loading = false
+      }
+      // send st
+    },
+    send() {
+      if (this.name === 'ST') {
+        this.sendST()
+      } else if (this.name === 'CKB') {
+        this.sendCKB()
+      }
+    },
+    sendCKB() {
       try {
         const { address, amount } = this.form
         const tx = await this.buildTx(address, amount)
@@ -218,7 +274,6 @@ export default {
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
         const txHash = await rpc.send_transaction(txObj)
-        console.log(`https://explorer.nervos.org/aggron/transaction/${txHash}`)
         this.$message.success('发送成功')
         const pendingList = this.Sea.localStorage('pendingList') || []
         pendingList.push({

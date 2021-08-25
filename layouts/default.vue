@@ -109,7 +109,7 @@ export default {
           assets.push({
             ...e,
             capacity,
-            sudtAmount: new Amount(e.sudtAmount, 0),
+            sudtAmount: new Amount(e.sudtAmount, AmountUnit.shannon),
             typeScript,
           })
         }
