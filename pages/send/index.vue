@@ -27,7 +27,7 @@
           placeholder="0"
         ></el-input>
       </el-form-item>
-      <div class="balance fee">{{ fee }} {{ asset.symbol }}</div>
+      <div class="balance fee">{{ fee }} CKB</div>
       <el-form-item :label="'手续费'"></el-form-item>
     </el-form>
     <el-button type="primary" :loading="loading" class="send" @click="bindSend">
@@ -121,7 +121,7 @@ export default {
     },
     balance() {
       const asset = this.asset
-      if (asset.decimals) {
+      if (asset.decimals !== undefined) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,

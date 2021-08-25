@@ -135,6 +135,7 @@ export default {
 
   .assets {
     margin-top: 30px;
+    margin-bottom: 30px;
     width: 100%;
     font-weight: bold;
     color: #333333;

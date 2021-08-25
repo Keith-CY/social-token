@@ -113,6 +113,7 @@ export default {
   components: { Qrcode, TxItem },
   data() {
     return {
+      name: this.$route.query.name,
       direction: 'all',
       txList: [],
       pendingList: [],
@@ -156,9 +157,8 @@ export default {
     },
     asset() {
       const assets = this.$store.state.assets
-      const name = this.$route.query.name
       for (const asset of assets) {
-        if (asset.symbol === name) {
+        if (asset.symbol === this.name) {
           return asset
         }
       }
@@ -166,7 +166,7 @@ export default {
     },
     balance() {
       const asset = this.asset
-      if (asset.decimals) {
+      if (asset.decimals !== undefined) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
@@ -178,16 +178,23 @@ export default {
     lockHash() {
       return this.$store.state.lockHash
     },
+    typeHash() {
+      if (this.name === 'CKB') {
+        return ''
+      } else {
+        return this.asset.typeHash
+      }
+    },
   },
   watch: {
-    '$store.state.lockHash'() {
+    typeHash() {
       this.loadTxRecords()
     },
   },
   created() {
-    const name = this.$route.query.name
+    const name = this.name
     if (name) {
-      if (name === 'CKB') {
+      if (name === 'CKB' || name === 'ST') {
         this.loadTxRecords()
       } else {
         this.$alert(`提示：暂不支持 ${name} 币`, {
@@ -216,11 +223,13 @@ export default {
     },
     formatBalance(tx) {
       const asset = this.asset
+      let string = ''
       const balance = new Amount(tx.amount, AmountUnit.shannon)
-      const string = balance.toString(asset.decimals, {
-        commify: true,
-        fixed: 4,
-      })
+      if (this.name === 'CKB') {
+        string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
+      } else if (this.name === 'ST') {
+        string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
+      }
       const op = tx.direction === 'out' ? '-' : '+'
       return op + string
     },
@@ -264,7 +273,7 @@ export default {
         url: '/cell/txListV2',
         params: {
           lockHash: this.lockHash,
-          typeHash: '',
+          typeHash: this.typeHash,
           lastTxId: lastTxId || '9999999999',
           size: this.size,
           direction: this.direction,
