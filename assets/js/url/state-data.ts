@@ -1,5 +1,4 @@
 import { Address, AddressType } from '@lay2/pw-core'
-import urlencode from 'urlencode'
 import { getAddressByPubkey } from '../utils/utils'
 import {
   ActionType,
@@ -73,7 +72,7 @@ export function getDataFromUrl(action: number) {
     return info
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const unipassStr = urlencode.decode(data, 'utf-8')
+  const unipassStr = encodeURIComponent(data)
 
   const unipassData = JSON.parse(unipassStr) as UnipassURLData
 
