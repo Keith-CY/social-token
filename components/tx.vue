@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="box">
-      <div class="balance">+45,100,100 CKB</div>
+      <div class="balance">{{ formatBalance(tx) }} {{ asset.symbol }}</div>
       <div class="one">
         <div class="label">来自：</div>
         <div class="value">{{ tx.from }}</div>
@@ -30,7 +30,7 @@
       </div>
       <div class="one">
         <div class="label">手续费：</div>
-        <div class="value">{{ formatFee(tx.fee) }}</div>
+        <div class="value">{{ formatFee(tx.fee) }} {{ asset.symbol }}</div>
       </div>
       <div class="one">
         <div class="label">哈希：</div>
@@ -42,7 +42,7 @@
       </div>
       <div class="one">
         <div class="label">备注：</div>
-        <div class="value">{{ tx.remark }}</div>
+        <div class="value">{{ tx.remark || '-' }}</div>
       </div>
     </div>
     <a
@@ -56,6 +56,7 @@
   </el-dialog>
 </template>
 <script>
+import { Amount, AmountUnit } from '@lay2/pw-core'
 import dayjs from 'dayjs'
 import Header from '~/components/header.vue'
 export default {
@@ -84,15 +85,38 @@ export default {
         this.$emit('update:show', val)
       },
     },
+    asset() {
+      const assets = this.$store.state.assets
+      const name = this.$route.query.name
+      for (const asset of assets) {
+        if (asset.symbol === name) {
+          return asset
+        }
+      }
+      return {}
+    },
   },
   methods: {
     dayjs,
     t_(key) {
       return this.$t('components.tx.' + key)
     },
+    formatBalance(tx) {
+      const asset = this.asset
+      if (tx.amount && asset.decimals) {
+        const balance = new Amount(tx.amount, AmountUnit.shannon)
+        const string = balance.toString(asset.decimals, {
+          commify: true,
+          fixed: 4,
+        })
+        const op = tx.direction === 'out' ? '-' : '+'
+        return op + string
+      }
+      return ''
+    },
     formatFee(fee) {
-      const amount = new Amount(fee)
-      console.log('🌊', amount)
+      const amount = new Amount(`${fee > 0 ? fee : 0}`, AmountUnit.shannon)
+      return amount.toString(8, { commify: true })
     },
   },
 }
