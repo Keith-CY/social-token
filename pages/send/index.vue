@@ -191,8 +191,8 @@ export default {
       } catch (error) {
         this.$message.error(error.message)
         console.error('error', error.message)
+        this.loading = false
       }
-      this.loading = false
     },
     sign(message, pubkey) {
       const url = new URL(`${process.env.UNIPASS_URL}/sign`)

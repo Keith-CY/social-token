@@ -225,6 +225,9 @@ export default {
       return op + string
     },
     formatState(tx) {
+      if (tx.type === 'pending') {
+        return 'pending'
+      }
       return tx.direction
     },
     formatAddress(address) {
