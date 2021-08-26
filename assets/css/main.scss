@@ -333,20 +333,32 @@ a {
     border-color: var(--primary);
   }
   &.el-button--default.el-button--primary {
-    color: var(--primary);
-    background: #fff;
-    border: 1px solid var(--primary);
+    color: #fff;
+    background-image: linear-gradient(320deg, var(--primary), var(--secondary));
+    border: 0;
     &::after {
-      background: inherit;
+      background-image: linear-gradient(
+        320deg,
+        rgba(49, 121, 255, 0.6),
+        rgba(157, 111, 255, 0.6)
+      );
     }
     &:hover {
-      background: inherit;
+      background-image: linear-gradient(
+        320deg,
+        var(--primary),
+        var(--secondary)
+      );
     }
     &.is-disabled {
       &:hover,
       &:focus,
       &:active {
-        background: inherit;
+        background-image: linear-gradient(
+          320deg,
+          var(--primary),
+          var(--secondary)
+        );
       }
     }
   }
@@ -388,6 +400,9 @@ a {
       border-radius: 4px !important;
       font-size: initial !important;
       font-weight: normal !important;
+    }
+    .el-button + .el-button {
+      margin-left: 10px !important;
     }
   }
 }

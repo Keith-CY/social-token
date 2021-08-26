@@ -151,13 +151,14 @@ export default {
       }
       if (this.direction === 'in') {
         return this.txList
-      } else {
-        const pendingList = []
-        for (let i = 0; i < this.pendingList.length; i++) {
-          const pending = this.pendingList[i]
-          if (pending.name !== this.name) {
-            continue
-          }
+      }
+      const pendingList = []
+      const pendingListAll = []
+      for (let i = 0; i < this.pendingList.length; i++) {
+        const pending = this.pendingList[i]
+        if (pending.name !== this.name) {
+          pendingListAll.push(pending)
+        } else {
           const mins = dayjs().diff(dayjs(pending.time), 'minute')
           // pending 小于十分钟
           if (mins < 10) {
@@ -165,13 +166,14 @@ export default {
             // 未上链
             if (index === -1) {
               pendingList.push(pending)
+              pendingListAll.push(pending)
             }
           }
         }
-        this.Sea.localStorage('pendingList', pendingList)
-        const all = pendingList.concat(this.txList)
-        return all
       }
+      this.Sea.localStorage('pendingList', pendingListAll)
+      const all = pendingList.concat(this.txList)
+      return all
     },
     asset() {
       const assets = this.$store.state.assets
@@ -549,7 +551,6 @@ export default {
         }
 
         .publisher {
-          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;

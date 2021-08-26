@@ -6,31 +6,42 @@
       label-position="top"
       :model="form"
       class="form"
+      @submit.native.prevent
     >
       <el-form-item :label="'收款地址'" prop="address">
         <el-input
+          ref="address"
           v-model.trim="form.address"
           type="textarea"
           placeholder="地址格式: CKB / ETH / ENS"
           resize="none"
           :readonly="loading"
           autosize
+          @keyup.enter="$refs.amount.focus()"
         ></el-input>
       </el-form-item>
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
       <el-form-item :label="'金额'" prop="amount">
         <el-input
+          ref="amount"
           v-model.trim="form.amount"
           type="number"
           :disabled="balance === ''"
           :readonly="loading"
           placeholder="0"
+          @keyup.enter="bindSend"
         ></el-input>
       </el-form-item>
       <div class="balance fee">{{ fee }} CKB</div>
       <el-form-item :label="'手续费'"></el-form-item>
     </el-form>
-    <el-button type="primary" :loading="loading" class="send" @click="bindSend">
+    <el-button
+      type="primary"
+      :loading="loading"
+      :disabled="balance === ''"
+      class="send"
+      @click="bindSend"
+    >
       发送
     </el-button>
   </div>
@@ -53,6 +64,7 @@ import {
 } from '~/assets/js/sudt/sudt-tranfer'
 import { getCkbEnv } from '~/assets/js/config'
 import UnipassBuilder from '~/assets/js/UnipassBuilder.ts'
+import UnipassBuilderClear from '~/assets/js/UnipassBuilderClear.ts'
 import UnipassSigner from '~/assets/js/UnipassSigner.ts'
 export default {
   data() {
@@ -120,11 +132,14 @@ export default {
       loading: false,
       form: {
         address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47d2pxgpmm7c0ds5emzj7nc4e9zdgwzuw65stdl58',
-        amount: '',
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47vjpxyrtnwmd0zjkc92rjtkyjg38yfdnnx3fknz4',
+        amount: '100',
       },
       fee: '0.00001551',
+      feeRate: 1000,
       name,
+      // 发送全部 CKB
+      clearCKB: false,
     }
   },
   computed: {
@@ -163,6 +178,23 @@ export default {
       return this.asset.typeScript.args
     },
   },
+  created() {
+    const name = this.name
+    if (name) {
+      if (name === 'CKB' || name === 'ST') {
+        //
+      } else {
+        this.$alert(`提示：暂不支持 ${name} 币`, {
+          confirmButtonText: '返回上一页',
+          callback: () => {
+            this.$router.back()
+          },
+        })
+      }
+    } else {
+      this.$router.replace('/')
+    }
+  },
   mounted() {
     if (this.balance) {
       this.loading = false
@@ -180,8 +212,6 @@ export default {
         }
       } else if (ret.info === 'sign fail') {
         this.$message.error('拒绝签名')
-      } else if (ret.info === 'sign fail') {
-        this.$message.error('拒绝签名')
       } else if (ret.info === 'pubkey not match') {
         this.$message.error('公钥不匹配')
       } else {
@@ -191,11 +221,19 @@ export default {
   },
   methods: {
     async buildTx(address, amount) {
-      const builder = new UnipassBuilder(
-        new Address(address, AddressType.ckb),
-        new Amount(amount),
-        1000,
-      )
+      let builder
+      if (this.clearCKB) {
+        builder = new UnipassBuilderClear(
+          new Address(address, AddressType.ckb),
+          this.feeRate,
+        )
+      } else {
+        builder = new UnipassBuilder(
+          new Address(address, AddressType.ckb),
+          new Amount(amount),
+          this.feeRate,
+        )
+      }
       const tx = await builder.build()
       return tx
     },
@@ -260,8 +298,9 @@ export default {
         this.sign(message, provider.pubkey)
       } catch (error) {
         this.loading = false
-        console.error(error.message)
-        this.$message.error(error.message)
+        const message = error.message
+        console.error(message)
+        this.$message.error(message)
       }
     },
     async sendCKB() {
@@ -283,9 +322,26 @@ export default {
         })
         this.sign(message, pubkey)
       } catch (error) {
-        this.$message.error(error.message)
-        console.error('error', error.message)
         this.loading = false
+        const message = error.message
+        if (message.includes('input capacity not enough')) {
+          this.$confirm(
+            '剩余金额过低，无法发送交易。是否要发送全部的 CKB？',
+            '注意',
+            {
+              confirmButtonText: '发送全部 CKB',
+              cancelButtonText: '取消',
+            },
+          )
+            .then(() => {
+              this.clearCKB = true
+              this.sendCKB()
+            })
+            .catch(() => {})
+        } else {
+          this.$message.error(message)
+          console.error('error', message)
+        }
       }
     },
     sign(message, pubkey) {

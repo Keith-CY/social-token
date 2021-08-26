@@ -30,7 +30,7 @@
       </div>
       <div class="one">
         <div class="label">手续费：</div>
-        <div class="value">{{ formatFee(tx.fee) }} {{ asset.symbol }}</div>
+        <div class="value">{{ formatFee(tx.fee) }} CKB</div>
       </div>
       <div class="one">
         <div class="label">哈希：</div>
