@@ -354,20 +354,36 @@ export default {
     async sendCKBNext(sig) {
       this.loading = true
       try {
-        const witness = new Reader(
-          SerializeWitnessArgs(
-            normalizers.NormalizeWitnessArgs({
-              lock: '0x01' + sig.replace('0x', ''),
-              input_type: '',
-              output_type: '',
-            }),
-          ),
-        ).serializeJson()
+        let witness
+        if (this.clearCKB) {
+          witness = new Reader(
+            SerializeWitnessArgs(
+              normalizers.NormalizeWitnessArgs({
+                lock: '0x00' + sig.replace('0x', ''),
+                input_type: '',
+                output_type: '',
+              }),
+            ),
+          ).serializeJson()
+        } else {
+          witness = new Reader(
+            SerializeWitnessArgs(
+              normalizers.NormalizeWitnessArgs({
+                lock: '0x01' + sig.replace('0x', ''),
+                input_type: '',
+                output_type: '',
+              }),
+            ),
+          ).serializeJson()
+        }
+
         const { txObj, pending } = this.Sea.localStorage('signData')
         txObj.witnesses[0] = witness
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
+        console.log(JSON.stringify(txObj))
         const txHash = await rpc.send_transaction(txObj)
+        console.log('txHash', txHash)
         if (txHash) {
           this.$message.success('发送成功')
           this.pendingList(txHash, pending)
