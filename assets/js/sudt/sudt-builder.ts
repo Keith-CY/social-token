@@ -28,21 +28,9 @@ export class SUDTBuilder extends Builder {
 
   isAcp(): boolean {
     const acpLockList = [
-      new Script(
-        '0xbf43c3602455798c1a61a596e0d95278864c552fafe231c063b3fabf97a8febc',
-        '0x',
-        HashType.type,
-      ),
-      new Script(
-        '0x0fb343953ee78c9986b091defb6252154e0bb51044fd2879fde5b27314506111',
-        '0x',
-        HashType.data,
-      ),
-      new Script(
-        '0x124a60cd799e1fbca664196de46b3f7f0ecb7138133dcaea4893c51df5b02be6',
-        '0x',
-        HashType.type,
-      ),
+      new Script(process.env.PW_ACP_LOCK as string, '0x', HashType.type),
+      new Script(process.env.UNIPASS_ACP_LOCK as string, '0x', HashType.type),
+      new Script(process.env.CKB_ACP_LOCK as string, '0x', HashType.data),
     ]
     const script = this.address.toLockScript()
     const { codeHash, hashType } = script
