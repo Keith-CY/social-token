@@ -209,6 +209,13 @@ export default {
         }
       })
     },
+    send() {
+      if (this.name === 'ST') {
+        this.sendST()
+      } else if (this.name === 'CKB') {
+        this.sendCKB()
+      }
+    },
     async sendST() {
       // check
       const provider = this.provider
@@ -242,19 +249,19 @@ export default {
           amount,
           provider.pubkey,
         )
-        this.Sea.localStorage('signData', { txObj, message })
+        this.Sea.localStorage('signData', {
+          txObj,
+          pending: {
+            from: this.provider.address,
+            to: address,
+            amount: new Amount(amount, AmountUnit.shannon).toHexString(),
+          },
+        })
         this.sign(message, provider.pubkey)
       } catch (error) {
         this.loading = false
         console.error(error.message)
         this.$message.error(error.message)
-      }
-    },
-    send() {
-      if (this.name === 'ST') {
-        this.sendST()
-      } else if (this.name === 'CKB') {
-        this.sendCKB()
       }
     },
     async sendCKB() {
@@ -305,20 +312,12 @@ export default {
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
         const txHash = await rpc.send_transaction(txObj)
-        this.$message.success('发送成功')
-        const pendingListCKB = this.Sea.localStorage('pendingListCKB') || []
-        pendingListCKB.push({
-          hash: txHash,
-          time: Date.now(),
-          token: 'CKB',
-          from: pending.from,
-          to: pending.to,
-          type: 'pending',
-          amount: pending.amount,
-          fee: 1551,
-          direction: 'out',
-        })
-        this.Sea.localStorage('pendingListCKB', pendingListCKB)
+        if (txHash) {
+          this.$message.success('发送成功')
+          this.pendingList(txHash, pending)
+        } else {
+          this.$message.error('交易失败')
+        }
       } catch (error) {
         this.$message.error(error.message)
         console.error('error', error.message)
@@ -329,35 +328,34 @@ export default {
     async sendSTNext(sig) {
       try {
         this.loading = true
-        const { txObj } = this.Sea.localStorage('signData')
-        const txhash = await getSUDTSignCallback(sig, txObj)
-        this.$message.success('发送成功')
-        console.log('txhash', txhash)
-        // pending list
-        // const pendingListST = this.Sea.localStorage('pendingListST') || []
-        // pendingListST.push({
-        //   // id: 8742876,
-        //   hash: txHash,
-        //   time: Date.now(),
-        //   token: 'CKB',
-        //   from: pending.from,
-        //   to: pending.to,
-        //   type: 'pending',
-        //   amount: pending.amount,
-        //   fee: 1551,
-        //   direction: 'out',
-        //   // blockNumber: 2538481,
-        //   // inputSize: 1,
-        //   // outputSize: 2,
-        //   // remark: '',
-        // })
-        // this.Sea.localStorage('pendingListST', pendingListST)
+        const { txObj, pending } = this.Sea.localStorage('signData')
+        const txHash = await getSUDTSignCallback(sig, txObj)
+        if (txHash) {
+          this.$message.success('发送成功')
+          this.pendingList(txHash, pending)
+        } else {
+          this.$message.error('交易失败')
+        }
       } catch (error) {
         this.$message.error(error.message)
         console.error('error', error.message)
       }
       this.Sea.params('unipass_ret', '')
       this.loading = false
+    },
+    pendingList(txHash, pending) {
+      const pendingList = this.Sea.localStorage('pendingList') || []
+      pendingList.push({
+        hash: txHash,
+        time: Date.now(),
+        from: pending.from,
+        to: pending.to,
+        type: 'pending',
+        amount: pending.amount,
+        direction: 'out',
+        name: this.name,
+      })
+      this.Sea.localStorage('pendingList', pendingList)
     },
   },
 }

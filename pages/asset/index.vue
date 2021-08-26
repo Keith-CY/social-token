@@ -59,8 +59,8 @@
                 <img class="icon" src="~/assets/img/asset/github.svg" />
               </a>
               <a
-                v-if="asset.issuerSocialInfo.Facebook"
-                :href="asset.issuerSocialInfo.Facebook"
+                v-if="asset.issuerSocialInfo.facebook"
+                :href="asset.issuerSocialInfo.facebook"
                 target="_blank"
               >
                 <img class="icon" src="~/assets/img/asset/facebook.svg" />
@@ -130,7 +130,7 @@ export default {
       name: this.$route.query.name,
       direction: 'all',
       txList: [],
-      pendingListCKB: [],
+      pendingList: [],
       pendingListST: [],
       loading: false,
       showQRCode: false,
@@ -147,26 +147,29 @@ export default {
     },
     formatTxList() {
       if (this.txList.length === 0) {
-        return this.pendingListCKB
+        return this.pendingList
       }
       if (this.direction === 'in') {
         return this.txList
       } else {
-        const pendingListCKB = []
-        for (let i = 0; i < this.pendingListCKB.length; i++) {
-          const pending = this.pendingListCKB[i]
+        const pendingList = []
+        for (let i = 0; i < this.pendingList.length; i++) {
+          const pending = this.pendingList[i]
+          if (pending.name !== this.name) {
+            continue
+          }
           const mins = dayjs().diff(dayjs(pending.time), 'minute')
           // pending 小于十分钟
           if (mins < 10) {
             const index = this.txList.findIndex((e) => e.hash === pending.hash)
             // 未上链
             if (index === -1) {
-              pendingListCKB.push(pending)
+              pendingList.push(pending)
             }
           }
         }
-        this.Sea.localStorage('pendingListCKB', pendingListCKB)
-        const all = pendingListCKB.concat(this.txList)
+        this.Sea.localStorage('pendingList', pendingList)
+        const all = pendingList.concat(this.txList)
         return all
       }
     },
@@ -238,9 +241,9 @@ export default {
   methods: {
     dayjs,
     initPending() {
-      const pendingListCKB = this.Sea.localStorage('pendingListCKB')
-      if (pendingListCKB) {
-        this.pendingListCKB = pendingListCKB
+      const pendingList = this.Sea.localStorage('pendingList')
+      if (pendingList) {
+        this.pendingList = pendingList
       }
     },
     formatBalance(tx) {
@@ -269,6 +272,14 @@ export default {
       })
     },
     bindTx(tx) {
+      if (tx.type === 'pending') {
+        console.log(
+          'txHash',
+          'https://explorer.nervos.org/aggron/transaction/' + tx.hash,
+        )
+        this.$message.info('交易进行中')
+        return
+      }
       this.itemTx = tx
       this.showTxItem = true
     },
@@ -328,10 +339,10 @@ export default {
         },
       })
       if (res.code === 200) {
-        const pendingListCKB = this.Sea.localStorage('pendingListCKB')
-        if (pendingListCKB) {
-          for (let i = 0; i < this.pendingListCKB.length; i++) {
-            const pending = this.pendingListCKB[i]
+        const pendingList = this.Sea.localStorage('pendingList')
+        if (pendingList) {
+          for (let i = 0; i < this.pendingList.length; i++) {
+            const pending = this.pendingList[i]
             const index = res.data.findIndex((e) => e.hash === pending.hash)
             // 已上链
             if (index !== -1) {
@@ -503,6 +514,8 @@ export default {
             justify-content: center;
             align-items: center;
             transition: none;
+            color: #666666;
+            background: #FFFFFF;
           }
         }
 
@@ -510,6 +523,7 @@ export default {
           .el-radio-button__inner {
             border-radius: 16px;
             background: linear-gradient(320deg, #1C7BFF 0%, #9D6FFF 100%);
+            color: #FFFFFF;
           }
         }
       }
@@ -637,7 +651,7 @@ export default {
         }
 
         .tx.pending {
-          cursor: not-allowed;
+          // cursor: not-allowed;
           opacity: 0.6;
         }
 
