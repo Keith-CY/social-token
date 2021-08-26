@@ -115,8 +115,9 @@ export default {
       return ''
     },
     formatFee(fee) {
+      const asset = this.asset
       const amount = new Amount(`${fee > 0 ? fee : 0}`, AmountUnit.shannon)
-      return amount.toString(8, { commify: true })
+      return amount.toString(asset.decimals, { commify: true })
     },
   },
 }

@@ -22,6 +22,7 @@ export default {
   provide() {
     return {
       reload: this.reload,
+      loadAssets: this.loadAssets,
     }
   },
   data() {
@@ -39,8 +40,7 @@ export default {
   methods: {
     reload() {
       this.Sea.localStorage('provider', '')
-      this.Sea.localStorage('pendingListCKB', '')
-      this.Sea.localStorage('pendingListST', '')
+      this.Sea.localStorage('pendingList', '')
       this.Sea.localStorage('signData', '')
       window.location.reload()
     },
@@ -80,11 +80,11 @@ export default {
         new IndexerCollector(url.INDEXER_URL),
         url.CHAIN_ID,
       )
+      this.loadAssets()
+    },
+    async loadAssets() {
       const addressHash = PWCore.provider.address.toLockScript().toHash()
       this.$store.state.lockHash = addressHash
-      this.loadAssets(addressHash)
-    },
-    async loadAssets(addressHash) {
       const res = await this.$axios({
         url: '/cell/assets',
         params: {

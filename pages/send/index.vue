@@ -132,10 +132,10 @@ export default {
       loading: false,
       form: {
         address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47vjpxyrtnwmd0zjkc92rjtkyjg38yfdnnx3fknz4',
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dkxuc3wnfzdj0hktmzj5pxhpl47g9x38ymtr465',
         amount: '100',
       },
-      fee: '0.00001551',
+      fee: '0',
       feeRate: 1000,
       name,
       // 发送全部 CKB
@@ -335,6 +335,11 @@ export default {
           )
             .then(() => {
               this.clearCKB = true
+              const asset = this.asset
+              this.form.amount = asset.capacity.toString(
+                asset.decimals,
+                AmountUnit.shannon,
+              )
               this.sendCKB()
             })
             .catch(() => {})
@@ -376,14 +381,11 @@ export default {
             ),
           ).serializeJson()
         }
-
         const { txObj, pending } = this.Sea.localStorage('signData')
         txObj.witnesses[0] = witness
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
-        console.log(JSON.stringify(txObj))
         const txHash = await rpc.send_transaction(txObj)
-        console.log('txHash', txHash)
         if (txHash) {
           this.$message.success('发送成功')
           this.pendingList(txHash, pending)

@@ -125,13 +125,13 @@ dayjs.locale('zh-cn')
 export default {
   name: 'Asset',
   components: { Qrcode, TxItem },
+  inject: ['loadAssets'],
   data() {
     return {
       name: this.$route.query.name,
       direction: 'all',
       txList: [],
       pendingList: [],
-      pendingListST: [],
       loading: false,
       showQRCode: false,
       showTxItem: false,
@@ -154,6 +154,7 @@ export default {
       }
       const pendingList = []
       const pendingListAll = []
+      let refresh = false
       for (let i = 0; i < this.pendingList.length; i++) {
         const pending = this.pendingList[i]
         if (pending.name !== this.name) {
@@ -167,9 +168,14 @@ export default {
             if (index === -1) {
               pendingList.push(pending)
               pendingListAll.push(pending)
+            } else {
+              refresh = true
             }
           }
         }
+      }
+      if (refresh) {
+        this.loadAssets()
       }
       this.Sea.localStorage('pendingList', pendingListAll)
       const all = pendingList.concat(this.txList)
