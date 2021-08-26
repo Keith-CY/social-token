@@ -18,6 +18,7 @@
           :readonly="loading"
           autosize
           @keyup.enter="$refs.amount.focus()"
+          @blur="bindBlur"
         ></el-input>
       </el-form-item>
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
@@ -26,13 +27,13 @@
           ref="amount"
           v-model.trim="form.amount"
           type="number"
-          :disabled="balance === ''"
           :readonly="loading"
           placeholder="0"
           @keyup.enter="bindSend"
+          @blur="bindBlur"
         ></el-input>
       </el-form-item>
-      <div class="balance fee">{{ fee }} CKB</div>
+      <div v-loading="feeLoading" class="balance fee">{{ fee }} CKB</div>
       <el-form-item :label="'手续费'"></el-form-item>
     </el-form>
     <el-button
@@ -57,6 +58,7 @@ import PWCore, {
   SerializeWitnessArgs,
   transformers,
   AmountUnit,
+  Builder,
 } from '@lay2/pw-core'
 import {
   getUSDTSignMessage,
@@ -103,7 +105,7 @@ export default {
           callback(new Error(error.message))
           return
         }
-      } else if (name === 'ST') {
+      } else {
         try {
           const amount = new Amount(value, AmountUnit.shannon)
           const asset = this.asset
@@ -129,17 +131,20 @@ export default {
           { validator: checkAmount, trigger: 'change' },
         ],
       },
+      feeLoading: false,
       loading: false,
       form: {
-        address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dkxuc3wnfzdj0hktmzj5pxhpl47g9x38ymtr465',
-        amount: '100',
+        address: '',
+        amount: '',
       },
-      fee: '0',
+      fee: name === 'CKB' ? '0.00001551' : '0.00002040',
       feeRate: 1000,
       name,
       // 发送全部 CKB
       clearCKB: false,
+      nowTx: null,
+      oldAmount: '',
+      oldAddress: '',
     }
   },
   computed: {
@@ -175,23 +180,15 @@ export default {
       }
     },
     sudtTokenId() {
-      return this.asset.typeScript.args
+      if (this.asset && this.asset.typeScript) {
+        return this.asset.typeScript.args
+      }
+      return ''
     },
   },
   created() {
     const name = this.name
-    if (name) {
-      if (name === 'CKB' || name === 'ST') {
-        //
-      } else {
-        this.$alert(`提示：暂不支持 ${name} 币`, {
-          confirmButtonText: '返回上一页',
-          callback: () => {
-            this.$router.back()
-          },
-        })
-      }
-    } else {
+    if (!name) {
       this.$router.replace('/')
     }
   },
@@ -205,10 +202,8 @@ export default {
         const name = this.name
         if (name === 'CKB') {
           this.sendCKBNext(ret.data.sig)
-        } else if (name === 'ST') {
-          this.sendSTNext(ret.data.sig)
         } else {
-          this.$message.error('未知资产')
+          this.sendSTNext(ret.data.sig)
         }
       } else if (ret.info === 'sign fail') {
         this.$message.error('拒绝签名')
@@ -220,41 +215,27 @@ export default {
     }
   },
   methods: {
-    async buildTx(address, amount) {
-      let builder
-      if (this.clearCKB) {
-        builder = new UnipassBuilderClear(
-          new Address(address, AddressType.ckb),
-          this.feeRate,
-        )
-      } else {
-        builder = new UnipassBuilder(
-          new Address(address, AddressType.ckb),
-          new Amount(amount),
-          this.feeRate,
-        )
-      }
-      const tx = await builder.build()
-      return tx
-    },
-    bindSend() {
-      this.loading = true
-      this.$refs.form.validate((ok) => {
-        if (ok) {
-          this.send()
+    async bindBlur() {
+      const { address, amount } = this.form
+      if (address && amount) {
+        if (this.oldAmount === amount && this.oldAddress === address) {
+          return
         } else {
-          this.loading = false
+          this.oldAmount = amount
+          this.oldAddress = address
         }
-      })
-    },
-    send() {
-      if (this.name === 'ST') {
-        this.sendST()
-      } else if (this.name === 'CKB') {
-        this.sendCKB()
+        this.feeLoading = true
+        try {
+          if (this.name === 'CKB') {
+            await this.buildCKB()
+          } else {
+            await this.buildST()
+          }
+        } catch (error) {}
+        this.feeLoading = false
       }
     },
-    async sendST() {
+    async buildST() {
       // check
       const provider = this.provider
       const { address, amount } = this.form
@@ -279,18 +260,66 @@ export default {
         this.loading = false
         return
       }
-      // send
-      try {
-        const { message, txObj } = await getUSDTSignMessage(
+      // build
+      if (address && amount && this.sudtTokenId) {
+        const { tx, txObj, message } = await getUSDTSignMessage(
           this.sudtTokenId,
           address,
           amount,
           provider.pubkey,
         )
+        const fee = Builder.calcFee(tx, this.feeRate)
+        this.fee = fee.toString(8, AmountUnit.shannon)
+        return { txObj, message }
+      }
+    },
+    async buildCKB() {
+      const { address, amount } = this.form
+      let builder
+      if (this.clearCKB) {
+        builder = new UnipassBuilderClear(
+          new Address(address, AddressType.ckb),
+          this.feeRate,
+        )
+      } else {
+        builder = new UnipassBuilder(
+          new Address(address, AddressType.ckb),
+          new Amount(amount),
+          this.feeRate,
+        )
+      }
+      const tx = await builder.build()
+      const fee = Builder.calcFee(tx, this.feeRate)
+      this.fee = fee.toString(8, AmountUnit.shannon)
+      return tx
+    },
+    bindSend() {
+      this.loading = true
+      this.$refs.form.validate((ok) => {
+        if (ok) {
+          this.send()
+        } else {
+          this.loading = false
+        }
+      })
+    },
+    send() {
+      if (this.name === 'CKB') {
+        this.sendCKB()
+      } else {
+        this.sendST()
+      }
+    },
+    async sendST() {
+      const provider = this.provider
+      const { address, amount } = this.form
+      // send
+      try {
+        const { message, txObj } = await this.buildST()
         this.Sea.localStorage('signData', {
           txObj,
           pending: {
-            from: this.provider.address,
+            from: provider.address,
             to: address,
             amount: new Amount(amount, AmountUnit.shannon).toHexString(),
           },
@@ -306,7 +335,7 @@ export default {
     async sendCKB() {
       try {
         const { address, amount } = this.form
-        const tx = await this.buildTx(address, amount)
+        const tx = await this.buildCKB(address, amount)
         const signer = new UnipassSigner(PWCore.provider)
         const messages = signer.toMessages(tx)
         const message = messages[0].message
@@ -322,8 +351,8 @@ export default {
         })
         this.sign(message, pubkey)
       } catch (error) {
-        this.loading = false
         const message = error.message
+        this.loading = false
         if (message.includes('input capacity not enough')) {
           this.$confirm(
             '剩余金额过低，无法发送交易。是否要发送全部的 CKB？',

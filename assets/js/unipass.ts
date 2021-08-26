@@ -71,7 +71,7 @@ export const getAddress = (masterKey: string) => {
 }
 
 export async function getUnipassCellDeps(): Promise<CellDep[]> {
-  const url = process.env.CELL_DEPS_API as string
+  const url = (process.env.PW_URL as string) + '/transaction/cellDeps'
   const params = [
     {
       codeHash: process.env.UNIPASS_TYPE_ID,

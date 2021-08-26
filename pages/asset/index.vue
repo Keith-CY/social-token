@@ -192,7 +192,7 @@ export default {
     },
     balance() {
       const asset = this.asset
-      if (asset.decimals !== undefined) {
+      if (asset) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
@@ -207,16 +207,14 @@ export default {
     typeHash() {
       if (this.name === 'CKB') {
         return ''
-      } else if (this.name === 'ST') {
-        return this.asset.typeHash
       } else {
-        return ''
+        return this.asset.typeHash
       }
     },
   },
   watch: {
     typeHash() {
-      if (this.name === 'ST') {
+      if (this.name !== 'CKB') {
         this.loadTxRecords()
       }
     },
@@ -229,16 +227,7 @@ export default {
   created() {
     const name = this.name
     if (name) {
-      if (name === 'CKB' || name === 'ST') {
-        this.loadTxRecords()
-      } else {
-        this.$alert(`提示：暂不支持 ${name} 币`, {
-          confirmButtonText: '返回上一页',
-          callback: () => {
-            this.$router.back()
-          },
-        })
-      }
+      this.loadTxRecords()
     } else {
       this.$router.replace('/')
     }
@@ -305,7 +294,7 @@ export default {
       if (!this.lockHash) {
         return
       }
-      if (!this.typeHash && this.name === 'ST') {
+      if (!this.typeHash && this.name !== 'CKB') {
         return
       }
       this.loading = true

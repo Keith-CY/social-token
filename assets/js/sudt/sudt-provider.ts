@@ -5,7 +5,7 @@ export class UsdtProvider extends Provider {
   constructor(private readonly masterPubkey: string) {
     super(Platform.ckb)
     const addressStr = getAddress(this.masterPubkey)
-    console.log('this.masterPubkey', this.masterPubkey)
+    // console.log('this.masterPubkey', this.masterPubkey)
     this.address = new Address(addressStr, AddressType.ckb)
   }
 

@@ -25,8 +25,8 @@ export async function getUSDTSignMessage(
   masterPubkey: string,
 ) {
   const provider = new UsdtProvider(masterPubkey)
-  const usdtAddress = provider.address
-  console.log('usdtAddress', usdtAddress.addressString)
+  // const usdtAddress = provider.address
+  // console.log('usdtAddress', usdtAddress.addressString)
 
   const cellDeps = await getUnipassCellDeps()
   const lockLen = (1 + (8 + 256 * 2) * 2) * 2
@@ -63,7 +63,7 @@ export async function getUSDTSignMessage(
   // console.log('[getUsdtSignMessage-messages]', messages)
   const txObj = transformers.TransformTransaction(tx)
   const message = messages[0].message
-  return { txObj, message }
+  return { tx, txObj, message }
 }
 
 export async function getSUDTSignCallback(sig: string, txObj: any) {
