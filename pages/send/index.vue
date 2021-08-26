@@ -163,7 +163,7 @@ export default {
     },
     balance() {
       const asset = this.asset
-      if (asset.decimals !== undefined) {
+      if (asset && asset.decimals !== undefined) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
@@ -315,16 +315,19 @@ export default {
       const { address, amount } = this.form
       // send
       try {
-        const { message, txObj } = await this.buildST()
-        this.Sea.localStorage('signData', {
-          txObj,
-          pending: {
-            from: provider.address,
-            to: address,
-            amount: new Amount(amount, AmountUnit.shannon).toHexString(),
-          },
-        })
-        this.sign(message, provider.pubkey)
+        const data = await this.buildST()
+        if (data) {
+          const { message, txObj } = data
+          this.Sea.localStorage('signData', {
+            txObj,
+            pending: {
+              from: provider.address,
+              to: address,
+              amount: new Amount(amount, AmountUnit.shannon).toHexString(),
+            },
+          })
+          this.sign(message, provider.pubkey)
+        }
       } catch (error) {
         this.loading = false
         const message = error.message
@@ -352,7 +355,6 @@ export default {
         this.sign(message, pubkey)
       } catch (error) {
         const message = error.message
-        this.loading = false
         if (message.includes('input capacity not enough')) {
           this.$confirm(
             '剩余金额过低，无法发送交易。是否要发送全部的 CKB？',
@@ -371,8 +373,11 @@ export default {
               )
               this.sendCKB()
             })
-            .catch(() => {})
+            .catch(() => {
+              this.loading = false
+            })
         } else {
+          this.loading = false
           this.$message.error(message)
           console.error('error', message)
         }

@@ -192,7 +192,7 @@ export default {
     },
     balance() {
       const asset = this.asset
-      if (asset) {
+      if (asset && asset.decimals !== undefined) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
