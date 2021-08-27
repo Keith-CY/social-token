@@ -1,8 +1,6 @@
 import {
   Address,
-  AddressType,
   Amount,
-  AmountUnit,
   BuilderOption,
   normalizers,
   Reader,
@@ -20,8 +18,8 @@ import { UnipassIndexerCollector } from './unipass-indexer-collector'
 
 export async function getUSDTSignMessage(
   sudtTokenId: string,
-  toAddress: string,
-  toAmount: string,
+  address: Address,
+  amount: Amount,
   masterPubkey: string,
 ) {
   const provider = new UsdtProvider(masterPubkey)
@@ -43,8 +41,6 @@ export async function getUSDTSignMessage(
     collector,
   }
 
-  const address = new Address(toAddress, AddressType.ckb)
-  const amount = new Amount(toAmount, AmountUnit.shannon)
   const sudt = new SUDT(sudtTokenId)
 
   const builder = new SUDTBuilder(

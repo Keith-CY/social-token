@@ -190,13 +190,16 @@ export default {
       }
       return {}
     },
+    decimals() {
+      return this.asset.decimals || AmountUnit.shannon
+    },
     balance() {
       const asset = this.asset
-      if (asset && asset.decimals !== undefined) {
+      if (asset.symbol) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
-        return balance.toString(asset.decimals, {
+        return balance.toString(this.decimals, {
           commify: true,
-          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
+          fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
         })
       }
       return ''
@@ -244,12 +247,11 @@ export default {
       }
     },
     formatBalance(tx) {
-      const asset = this.asset
       let string = ''
       const balance = new Amount(tx.amount, AmountUnit.shannon)
-      string = balance.toString(asset.decimals, {
+      string = balance.toString(this.decimals, {
         commify: true,
-        fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
+        fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
       })
       const op = tx.direction === 'out' ? '-' : '+'
       return op + string

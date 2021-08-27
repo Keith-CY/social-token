@@ -85,7 +85,7 @@ export default {
           callback(new Error('错误的地址格式'))
         }
       } catch (error) {
-        callback(error)
+        callback(new Error('错误的地址格式'))
       }
     }
     const checkAmount = (_rule, value, callback) => {
@@ -107,14 +107,21 @@ export default {
         }
       } else {
         try {
-          const amount = new Amount(value, AmountUnit.shannon)
           const asset = this.asset
+          const amount = new Amount(value, this.decimals)
           if (amount.gt(Amount.ZERO) && amount.gt(asset.sudtAmount)) {
             callback(new Error('转账金额必须小于余额'))
             return
           }
         } catch (error) {
-          callback(new Error(error.message))
+          const message = error.message
+          if (message.includes('is smaller than the digits number of')) {
+            callback(new Error(`小数点后最多 ${this.decimals} 位`))
+          } else if (message.includes('Cannot convert')) {
+            callback(new Error(`请输入整数`))
+          } else {
+            callback(new Error(message))
+          }
           return
         }
       }
@@ -134,7 +141,8 @@ export default {
       feeLoading: false,
       loading: false,
       form: {
-        address: '',
+        address:
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47d2pxgpmm7c0ds5emzj7nc4e9zdgwzuw65stdl58',
         amount: '',
       },
       fee: name === 'CKB' ? '0.00001551' : '0.00002040',
@@ -160,13 +168,16 @@ export default {
       }
       return {}
     },
+    decimals() {
+      return this.asset.decimals || AmountUnit.shannon
+    },
     balance() {
       const asset = this.asset
-      if (asset && asset.decimals !== undefined) {
+      if (asset.symbol) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
-        return balance.toString(asset.decimals, {
+        return balance.toString(this.decimals, {
           commify: true,
-          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
+          fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
         })
       }
       return ''
@@ -215,7 +226,15 @@ export default {
   },
   methods: {
     async bindBlur() {
-      const { address, amount } = this.form
+      const address = this.form.address
+      let amount = this.form.amount
+      if (amount && amount.includes('.')) {
+        const dot = amount.split('.')
+        if (dot[1].length > this.decimals) {
+          amount = String(Number(amount).toFixed(this.decimals))
+          this.form.amount = amount
+        }
+      }
       if (address && amount) {
         if (this.oldAmount === amount && this.oldAddress === address) {
           return
@@ -263,8 +282,8 @@ export default {
       if (address && amount && this.sudtTokenId) {
         const { tx, txObj, message } = await getUSDTSignMessage(
           this.sudtTokenId,
-          address,
-          amount,
+          new Address(address, AddressType.ckb),
+          new Amount(amount, this.decimals),
           provider.pubkey,
         )
         const fee = Builder.calcFee(tx, this.feeRate)
@@ -322,7 +341,7 @@ export default {
             pending: {
               from: provider.address,
               to: address,
-              amount: new Amount(amount, AmountUnit.shannon).toHexString(),
+              amount: new Amount(amount, this.decimals).toHexString(),
             },
           })
           this.sign(message, provider.pubkey)
@@ -367,7 +386,7 @@ export default {
               this.clearCKB = true
               const asset = this.asset
               this.form.amount = asset.capacity.toString(
-                asset.decimals,
+                this.decimals,
                 AmountUnit.shannon,
               )
               this.sendCKB()
