@@ -107,7 +107,7 @@ export default {
         const balance = new Amount(tx.amount, AmountUnit.shannon)
         const string = balance.toString(asset.decimals, {
           commify: true,
-          fixed: 4,
+          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
         })
         const op = tx.direction === 'out' ? '-' : '+'
         return op + string
@@ -116,7 +116,8 @@ export default {
     },
     formatFee(fee) {
       const amount = new Amount(`${fee > 0 ? fee : 0}`, AmountUnit.shannon)
-      return amount.toString(8, { commify: true })
+      // CKB
+      return amount.toString(8, AmountUnit.shannon)
     },
   },
 }

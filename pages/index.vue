@@ -21,7 +21,7 @@
       <div class="title">ASSETS LIST</div>
       <template v-for="asset in assets">
         <nuxt-link
-          :key="asset.id"
+          :key="asset.symbol"
           :to="{ path: '/asset', query: { name: asset.symbol } }"
         >
           <div class="asset">
@@ -64,7 +64,7 @@ export default {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
-          fixed: 4,
+          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
         })
       }
       return ''

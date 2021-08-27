@@ -153,9 +153,8 @@ export default {
     },
     asset() {
       const assets = this.$store.state.assets
-      const name = this.$route.query.name
       for (const asset of assets) {
-        if (asset.symbol === name) {
+        if (asset.symbol === this.name) {
           return asset
         }
       }
@@ -167,7 +166,7 @@ export default {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
-          fixed: 4,
+          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
         })
       }
       return ''

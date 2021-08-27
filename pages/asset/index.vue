@@ -30,8 +30,8 @@
           <div class="name">{{ asset.issuerName }}</div>
           <div class="publisher sea-colorful-border">发行人</div>
         </div>
-        <div class="introduction">
-          {{ asset.issuerInfo }}
+        <div v-if="asset.issuerSocialInfo" class="introduction">
+          {{ asset.issuerSocialInfo.issuerInfo }}
         </div>
         <div class="token-info">
           <div class="info">
@@ -196,7 +196,7 @@ export default {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity
         return balance.toString(asset.decimals, {
           commify: true,
-          fixed: 4,
+          fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
         })
       }
       return ''
@@ -247,7 +247,10 @@ export default {
       const asset = this.asset
       let string = ''
       const balance = new Amount(tx.amount, AmountUnit.shannon)
-      string = balance.toString(asset.decimals, { commify: true, fixed: 4 })
+      string = balance.toString(asset.decimals, {
+        commify: true,
+        fixed: asset.decimals >= 4 ? 4 : asset.decimals || undefined,
+      })
       const op = tx.direction === 'out' ? '-' : '+'
       return op + string
     },
@@ -355,10 +358,10 @@ export default {
       // console.log('socket-connect')
     },
     newBlock() {
-      this.refreshTxRecords()
+      // console.log('socket-newTx', data)
     },
     newTx() {
-      // console.log('socket-newTx', data)
+      this.refreshTxRecords()
     },
     disconnect() {
       // console.log('socket-disconnect')

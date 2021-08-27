@@ -27,6 +27,7 @@ export default {
   },
   data() {
     return {
+      name: this.$route.query.name,
       loading: true,
     }
   },
@@ -115,6 +116,12 @@ export default {
           })
         }
         this.$store.state.assets = assets
+        if (this.name) {
+          const asset = assets.find((e) => e.symbol === this.name)
+          if (!asset) {
+            this.$router.replace('/')
+          }
+        }
       } else {
         this.$message.error('资产获取失败')
       }
