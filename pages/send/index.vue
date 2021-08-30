@@ -141,8 +141,7 @@ export default {
       feeLoading: false,
       loading: false,
       form: {
-        address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47d2pxgpmm7c0ds5emzj7nc4e9zdgwzuw65stdl58',
+        address: '',
         amount: '',
       },
       fee: name === 'CKB' ? '0.00001551' : '0.00002040',
