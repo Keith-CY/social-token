@@ -57,6 +57,10 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+dayjs.locale('zh-cn')
+
 export default {
   inject: ['reload'],
   props: {
@@ -114,6 +118,7 @@ export default {
         lang = this.lang === 'en' ? 'zh' : 'en'
       }
       localStorage.setItem('language', lang)
+      dayjs.locale(lang === 'en' ? 'en' : 'zh-cn')
       this.$i18n.locale = lang
       this.lang = lang
       // keep-alive failure

@@ -107,7 +107,7 @@
                 {{ formatAddress(tx.from) }}
               </div>
               <div class="time">
-                {{ dayjs(tx.time).format('YYYY/M/D Ah:m') }}
+                {{ dayjs(tx.time).format('YYYY/M/D A h:mm') }}
               </div>
             </div>
             <div class="balance">{{ formatBalance(tx) }}</div>
@@ -127,11 +127,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-// import 'dayjs/locale/zh-cn'
 import { Amount, AmountUnit } from '@lay2/pw-core'
 import Qrcode from '~/components/qrcode.vue'
 import TxItem from '~/components/tx.vue'
-// dayjs.locale('zh-cn')
 export default {
   name: 'Asset',
   components: { Qrcode, TxItem },
@@ -505,9 +503,9 @@ export default {
       }
 
       .el-tabs__active-bar {
-        width: 36px !important;
+        // width: 36px !important;
         height: 4px;
-        margin: 0 14px;
+        // margin: 0 14px;
         background: linear-gradient(320deg, #1C7BFF 0%, #9D6FFF 100%);
         border-radius: 2px;
       }

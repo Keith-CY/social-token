@@ -130,11 +130,19 @@ export default {
     return {
       rules: {
         address: [
-          { required: true, message: '请填写收款地址', trigger: 'change' },
+          {
+            required: true,
+            message: this.t_('PleaseAddress'),
+            trigger: 'change',
+          },
           { validator: checkAddress, trigger: 'change' },
         ],
         amount: [
-          { required: true, message: '请填写金额', trigger: 'change' },
+          {
+            required: true,
+            message: this.t_('PleaseMoney'),
+            trigger: 'change',
+          },
           { validator: checkAmount, trigger: 'change' },
         ],
       },

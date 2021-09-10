@@ -15,7 +15,7 @@
       </div>
       <div class="info">
         <div class="title">{{ t_('title') }}</div>
-        <div class="date">{{ dayjs(tx.time).format('YYYY/M/D Ah:m') }}</div>
+        <div class="date">{{ dayjs(tx.time).format('YYYY/M/D A h:mm') }}</div>
       </div>
     </div>
     <div class="box">
