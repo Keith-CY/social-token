@@ -4,7 +4,7 @@
       <img class="bg" src="~/assets/img/home/info-card.svg" />
       <div class="top">
         <div class="left">
-          <div class="welcome">Welcome</div>
+          <div class="welcome">{{ t_('Welcome') }}</div>
           <div class="email">{{ provider.email }}</div>
         </div>
         <div class="right">
@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="assets">
-      <div class="title">ASSETS LIST</div>
+      <div class="title">{{ t_('AssetList') }}</div>
       <template v-for="asset in assets">
         <nuxt-link
           :key="asset.symbol"
@@ -59,6 +59,9 @@ export default {
     },
   },
   methods: {
+    t_(key) {
+      return this.$t('index.' + key)
+    },
     balance(asset) {
       if (asset.symbol) {
         const balance = asset.sudt ? asset.sudtAmount : asset.capacity

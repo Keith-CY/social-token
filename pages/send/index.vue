@@ -8,12 +8,12 @@
       class="form"
       @submit.native.prevent
     >
-      <el-form-item :label="'收款地址'" prop="address">
+      <el-form-item :label="t_('CollectionAddress')" prop="address">
         <el-input
           ref="address"
           v-model.trim="form.address"
           type="textarea"
-          placeholder="地址格式: CKB / ETH / ENS"
+          :placeholder="t_('CKBAddress')"
           resize="none"
           :readonly="loading"
           autosize
@@ -22,7 +22,7 @@
         ></el-input>
       </el-form-item>
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
-      <el-form-item :label="'金额'" prop="amount">
+      <el-form-item :label="t_('Money')" prop="amount">
         <el-input
           ref="amount"
           v-model.trim="form.amount"
@@ -34,7 +34,7 @@
         ></el-input>
       </el-form-item>
       <div v-loading="feeLoading" class="balance fee">{{ fee }} CKB</div>
-      <el-form-item :label="'手续费'"></el-form-item>
+      <el-form-item :label="t_('Fee')"></el-form-item>
     </el-form>
     <el-button
       type="primary"
@@ -43,7 +43,7 @@
       class="send"
       @click="bindSend"
     >
-      发送
+      {{ t_('Send') }}
     </el-button>
   </div>
 </template>
@@ -82,10 +82,10 @@ export default {
           new Address(value, AddressType.eth)
           callback()
         } else {
-          callback(new Error('错误的地址格式'))
+          callback(new Error(this.t_('BadAddress')))
         }
       } catch (error) {
-        callback(new Error('错误的地址格式'))
+        callback(new Error(this.t_('BadAddress')))
       }
     }
     const checkAmount = (_rule, value, callback) => {
@@ -93,12 +93,12 @@ export default {
         try {
           const amount = new Amount(value)
           if (amount.lt(new Amount('61'))) {
-            callback(new Error('最小金额为 61 CKB'))
+            callback(new Error(this.t_('Minimum')))
             return
           }
           const asset = this.asset
           if (amount.gt(Amount.ZERO) && amount.gt(asset.capacity)) {
-            callback(new Error('转账金额必须小于余额'))
+            callback(new Error(this.t_('LessThan')))
             return
           }
         } catch (error) {
@@ -110,15 +110,15 @@ export default {
           const asset = this.asset
           const amount = new Amount(value, this.decimals)
           if (amount.gt(Amount.ZERO) && amount.gt(asset.sudtAmount)) {
-            callback(new Error('转账金额必须小于余额'))
+            callback(new Error(this.t_('LessThan')))
             return
           }
         } catch (error) {
           const message = error.message
           if (message.includes('is smaller than the digits number of')) {
-            callback(new Error(`小数点后最多 ${this.decimals} 位`))
+            callback(new Error(this.t_('Maximum', { data: this.decimals })))
           } else if (message.includes('Cannot convert')) {
-            callback(new Error(`请输入整数`))
+            callback(new Error(this.t_('Integer')))
           } else {
             callback(new Error(message))
           }
@@ -147,7 +147,7 @@ export default {
       fee: name === 'CKB' ? '0.00001551' : '0.00002040',
       feeRate: 1000,
       name,
-      // 发送全部 CKB
+      // Send all CKB
       clearCKB: false,
       nowTx: null,
       oldAmount: '',
@@ -215,15 +215,19 @@ export default {
           this.sendSTNext(ret.data.sig)
         }
       } else if (ret.info === 'sign fail') {
-        this.$message.error('拒绝签名')
+        this.$message.error(this.t_('RejectSign'))
       } else if (ret.info === 'pubkey not match') {
-        this.$message.error('公钥不匹配')
+        // pubkey not match
+        this.$message.error(this.t_('PubkeyMismatch'))
       } else {
         this.Sea.params('unipass_ret', '')
       }
     }
   },
   methods: {
+    t_(key) {
+      return this.$t('send.' + key)
+    },
     async bindBlur() {
       const address = this.form.address
       let amount = this.form.amount
@@ -257,7 +261,8 @@ export default {
       const provider = this.provider
       const { address, amount } = this.form
       if (address === provider.address) {
-        this.$message.error('收款地址不能为自己')
+        // Collection address cannot be your own
+        this.$message.error(this.t_('CannotYour'))
         this.loading = false
         return
       }
@@ -273,7 +278,8 @@ export default {
         },
       })
       if (res.data.length === 0) {
-        this.$message.error('对方地址没有能接收的 SUDT，暂时无法转账')
+        // This asset does not exist at the opposite address, and cannot be transferred
+        this.$message.error(this.t_('DoesNot'))
         this.loading = false
         return
       }
@@ -373,14 +379,10 @@ export default {
       } catch (error) {
         const message = error.message
         if (message.includes('input capacity not enough')) {
-          this.$confirm(
-            '剩余金额过低，无法发送交易。是否要发送全部的 CKB？',
-            '注意',
-            {
-              confirmButtonText: '发送全部 CKB',
-              cancelButtonText: '取消',
-            },
-          )
+          this.$confirm(this.t_('SendAllTip'), this.t_('BeCareful'), {
+            confirmButtonText: this.t_('SendAll'),
+            cancelButtonText: this.t_('cancel'),
+          })
             .then(() => {
               this.clearCKB = true
               const asset = this.asset
@@ -438,10 +440,10 @@ export default {
         const rpc = new RPC(url.NODE_URL)
         const txHash = await rpc.send_transaction(txObj)
         if (txHash) {
-          this.$message.success('发送成功')
+          this.$message.success(this.t_('SendSuccess'))
           this.pendingList(txHash, pending)
         } else {
-          this.$message.error('交易失败')
+          this.$message.error(this.t_('SendFailed'))
         }
       } catch (error) {
         this.$message.error(error.message)
@@ -456,10 +458,10 @@ export default {
         const { txObj, pending } = this.Sea.localStorage('signData')
         const txHash = await getSUDTSignCallback(sig, txObj)
         if (txHash) {
-          this.$message.success('发送成功')
+          this.$message.success(this.t_('SendSuccess'))
           this.pendingList(txHash, pending)
         } else {
-          this.$message.error('交易失败')
+          this.$message.error(this.t_('SendFailed'))
         }
       } catch (error) {
         this.$message.error(error.message)

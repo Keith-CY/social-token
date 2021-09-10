@@ -155,11 +155,6 @@ a {
       line-height: 20px;
     }
   }
-  .el-form-item.is-required {
-    .el-form-item__label:before {
-      content: '' !important;
-    }
-  }
 }
 // el-input
 .el-input {
@@ -242,6 +237,11 @@ a {
     border: 0;
     padding: 0;
   }
+}
+.el-textarea .el-input__count {
+  line-height: initial;
+  bottom: 2.5px;
+  background: transparent;
 }
 
 // el-button
@@ -333,32 +333,20 @@ a {
     border-color: var(--primary);
   }
   &.el-button--default.el-button--primary {
-    color: #fff;
-    background-image: linear-gradient(320deg, var(--primary), var(--secondary));
-    border: 0;
+    color: var(--primary);
+    background: #fff;
+    border: 1px solid var(--primary);
     &::after {
-      background-image: linear-gradient(
-        320deg,
-        rgba(49, 121, 255, 0.6),
-        rgba(157, 111, 255, 0.6)
-      );
+      background: inherit;
     }
     &:hover {
-      background-image: linear-gradient(
-        320deg,
-        var(--primary),
-        var(--secondary)
-      );
+      background: inherit;
     }
     &.is-disabled {
       &:hover,
       &:focus,
       &:active {
-        background-image: linear-gradient(
-          320deg,
-          var(--primary),
-          var(--secondary)
-        );
+        background: inherit;
       }
     }
   }
@@ -401,9 +389,6 @@ a {
       font-size: initial !important;
       font-weight: normal !important;
     }
-    .el-button + .el-button {
-      margin-left: 10px !important;
-    }
   }
 }
 // mobile css
@@ -418,19 +403,19 @@ a {
 
 // pc css
 @media (min-width: 1024px) {
-  // 滚动条
+  // Scroll bar
   &::-webkit-scrollbar {
     width: 4px;
     height: 4px;
   }
 
-  // 失去焦点
+  // Lose focus
   &::-webkit-scrollbar-corner,
   ::-webkit-scrollbar-thumb:window-inactive {
     background: rgba(102, 128, 153, 0.1);
   }
 
-  // 滑块样式
+  // Slider style
   &::-webkit-scrollbar-thumb {
     background: rgba(102, 128, 153, 0.3);
   }
@@ -443,7 +428,7 @@ a {
     background: rgba(102, 128, 153, 0.6);
   }
 
-  // 背景色
+  // Background color
   &::-webkit-scrollbar-track {
     background: transparent;
   }

@@ -4,7 +4,7 @@ import enLocale from 'element-ui/lib/locale/lang/en'
 import zhLocale from 'element-ui/lib/locale/lang/zh-CN'
 import ElementLocale from 'element-ui/lib/locale'
 
-// 加入Vue全局
+// Join Vue Global
 Vue.use(VueI18n)
 
 export default ({ app }) => {
@@ -23,6 +23,6 @@ export default ({ app }) => {
     },
   })
 
-  // 配置element-ui的组件国际化
+  // Configure component internationalization for element UI
   ElementLocale.i18n((key, value) => app.i18n.t(key, value))
 }

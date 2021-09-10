@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Element from 'element-ui'
 import locale from 'element-ui/lib/locale/lang/zh-CN'
 
-// 按需加载
+// Load on demand
 // import {
 //   Loading,
 //   MessageBox,
@@ -18,7 +18,7 @@ import locale from 'element-ui/lib/locale/lang/zh-CN'
 //   CollapseItem,
 // } from 'element-ui'
 
-// 自定义主题
+// Custom theme
 import '~/assets/css/element-variables.scss'
 Vue.use(Element, { locale })
 

@@ -14,46 +14,46 @@
       </div>
       <div class="bottom">
         <div class="btn left" @click="showQRCode = true">
-          <span>收款</span>
+          <span>{{ t_('Collection') }}</span>
           <img src="~/assets/img/asset/qrcode.svg" />
         </div>
         <div class="btn right" @click="bindSend">
-          <span>转账</span>
+          <span>{{ t_('Send') }}</span>
           <img src="~/assets/img/asset/send.svg" />
         </div>
       </div>
     </div>
     <el-tabs v-model="activeTab" class="tabs">
-      <el-tab-pane class="token" label="代币详情" name="token">
+      <el-tab-pane class="token" :label="t_('TokenDetails')" name="token">
         <div class="user">
           <imgs class="avatar" :src="asset.issuerIcon" />
           <div class="name">{{ asset.issuerName }}</div>
-          <div class="publisher sea-colorful-border">发行人</div>
+          <div class="publisher sea-colorful-border">{{ t_('Publisher') }}</div>
         </div>
         <div v-if="asset.issuerSocialInfo" class="introduction">
           {{ asset.issuerSocialInfo.issuerInfo }}
         </div>
         <div class="token-info">
           <div class="info">
-            <div class="left">代币总量：</div>
+            <div class="left">{{ t_('TokenTotal') }}</div>
             <div class="right">
               {{ formatSupply(asset.supply) }}
             </div>
           </div>
           <div class="info">
-            <div class="left">流通量：</div>
+            <div class="left">{{ t_('Circulation') }}</div>
             <div class="right">
               {{ formatSupply(asset.circulatingSupply) }}
             </div>
           </div>
           <div class="info">
-            <div class="left">发行日期：</div>
+            <div class="left">{{ t_('IssueDate') }}</div>
             <div class="right">
               {{ dayjs(asset.issueDate).format('YYYY-M-D') }}
             </div>
           </div>
           <div v-if="asset.issuerSocialInfo" class="info">
-            <div class="left">社交方式：</div>
+            <div class="left">{{ t_('SocialStyle') }}</div>
             <div class="right">
               <a
                 v-if="asset.issuerSocialInfo.github"
@@ -80,11 +80,15 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane class="record" label="交易记录" name="record">
+      <el-tab-pane
+        class="record"
+        :label="t_('TransactionRecord')"
+        name="record"
+      >
         <el-radio-group v-model="direction" @change="bindDirection">
-          <el-radio-button label="all">全部</el-radio-button>
-          <el-radio-button label="in">收入</el-radio-button>
-          <el-radio-button label="out">转出</el-radio-button>
+          <el-radio-button label="all">{{ t_('All') }}</el-radio-button>
+          <el-radio-button label="in">{{ t_('In') }}</el-radio-button>
+          <el-radio-button label="out">{{ t_('Out') }}</el-radio-button>
         </el-radio-group>
         <div class="tx-list">
           <div
@@ -109,7 +113,9 @@
             <div class="balance">{{ formatBalance(tx) }}</div>
           </div>
           <div v-loading="loading" class="more">
-            <div v-if="hasMore" class="load" @click="bindMore">加载更多</div>
+            <div v-if="hasMore" class="load" @click="bindMore">
+              {{ t_('loadMore') }}
+            </div>
             <div v-else class="end">~</div>
           </div>
         </div>
@@ -121,11 +127,11 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
+// import 'dayjs/locale/zh-cn'
 import { Amount, AmountUnit } from '@lay2/pw-core'
 import Qrcode from '~/components/qrcode.vue'
 import TxItem from '~/components/tx.vue'
-dayjs.locale('zh-cn')
+// dayjs.locale('zh-cn')
 export default {
   name: 'Asset',
   components: { Qrcode, TxItem },
@@ -141,7 +147,7 @@ export default {
       showTxItem: false,
       hasMore: true,
       size: 10,
-      activeTab: 'record',
+      activeTab: 'token',
       itemTx: {},
     }
   },
@@ -165,10 +171,10 @@ export default {
           pendingListAll.push(pending)
         } else {
           const mins = dayjs().diff(dayjs(pending.time), 'minute')
-          // pending 小于十分钟
+          // pending Less than ten minutes
           if (mins < 10) {
             const index = this.txList.findIndex((e) => e.hash === pending.hash)
-            // 未上链
+            // Not chained
             if (index === -1) {
               pendingList.push(pending)
               pendingListAll.push(pending)
@@ -244,6 +250,9 @@ export default {
   },
   methods: {
     dayjs,
+    t_(key) {
+      return this.$t('asset.' + key)
+    },
     initPending() {
       const pendingList = this.Sea.localStorage('pendingList')
       if (pendingList) {
@@ -254,12 +263,15 @@ export default {
       if (this.name === 'CKB') {
         return supply
       }
-      const balance = new Amount(supply, AmountUnit.shannon)
-      const string = balance.toString(this.decimals, {
-        commify: true,
-        fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
-      })
-      return string
+      if (supply) {
+        const balance = new Amount(supply, AmountUnit.shannon)
+        const string = balance.toString(this.decimals, {
+          commify: true,
+          fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
+        })
+        return string
+      }
+      return ''
     },
     formatBalance(tx) {
       const balance = new Amount(tx.amount, AmountUnit.shannon)
@@ -293,7 +305,7 @@ export default {
           'txHash',
           'https://explorer.nervos.org/aggron/transaction/' + tx.hash,
         )
-        this.$message.info('交易进行中')
+        this.$message.info(t_('Pending'))
         return
       }
       this.itemTx = tx
@@ -340,7 +352,7 @@ export default {
           this.hasMore = true
         }
       } else {
-        this.$message.error('请求失败')
+        this.$message.error(t_('RequestFailed'))
       }
     },
     async refreshTxRecords() {
@@ -360,7 +372,7 @@ export default {
           for (let i = 0; i < this.pendingList.length; i++) {
             const pending = this.pendingList[i]
             const index = res.data.findIndex((e) => e.hash === pending.hash)
-            // 已上链
+            // Chained
             if (index !== -1) {
               this.loadTxRecords()
             }

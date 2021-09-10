@@ -14,34 +14,34 @@
         <img src="~/assets/img/right.svg" />
       </div>
       <div class="info">
-        <div class="title">交易成功！</div>
+        <div class="title">{{ t_('title') }}</div>
         <div class="date">{{ dayjs(tx.time).format('YYYY/M/D Ah:m') }}</div>
       </div>
     </div>
     <div class="box">
       <div class="balance">{{ formatBalance(tx) }} {{ asset.symbol }}</div>
       <div class="one">
-        <div class="label">来自：</div>
+        <div class="label">{{ t_('title') }}</div>
         <div class="value">{{ tx.from }}</div>
       </div>
       <div class="one">
-        <div class="label">去往：</div>
+        <div class="label">{{ t_('to') }}</div>
         <div class="value">{{ tx.to }}</div>
       </div>
       <div class="one">
-        <div class="label">手续费：</div>
+        <div class="label">{{ t_('fee') }}</div>
         <div class="value">{{ formatFee(tx.fee) }} CKB</div>
       </div>
       <div class="one">
-        <div class="label">哈希：</div>
+        <div class="label">{{ t_('hash') }}</div>
         <div class="value">{{ tx.hash }}</div>
       </div>
       <div class="one">
-        <div class="label">区块：</div>
+        <div class="label">{{ t_('block') }}</div>
         <div class="value">{{ tx.blockNumber }}</div>
       </div>
       <div class="one">
-        <div class="label">备注：</div>
+        <div class="label">{{ t_('remark') }}</div>
         <div class="value">{{ tx.remark || '-' }}</div>
       </div>
     </div>
@@ -51,7 +51,7 @@
       target="_blank"
     >
       <img src="~/assets/img/explorer.svg" />
-      <span>在 Nervos 浏览器中查看</span>
+      <span>{{ t_('browser') }}</span>
     </a>
   </el-dialog>
 </template>

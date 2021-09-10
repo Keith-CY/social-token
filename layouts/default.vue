@@ -39,14 +39,14 @@ export default {
     }
   },
   methods: {
+    t_(key) {
+      return this.$t('default.' + key)
+    },
     reload() {
       this.Sea.localStorage('provider', '')
       this.Sea.localStorage('pendingList', '')
       this.Sea.localStorage('signData', '')
       window.location.reload()
-    },
-    t_(key) {
-      return this.$t('default.' + key)
     },
     init() {
       const provider = this.Sea.localStorage('provider')
@@ -99,6 +99,9 @@ export default {
           if (e.symbol === 'DAO') {
             continue
           }
+          if (e.symbol === 'CKB') {
+            continue
+          }
           const capacity = new Amount(e.capacity, AmountUnit.shannon)
           let typeScript = null
           if (e.typeScript) {
@@ -123,7 +126,7 @@ export default {
           }
         }
       } else {
-        this.$message.error('资产获取失败')
+        this.$message.error(this.t_('AssetFailed'))
       }
     },
   },

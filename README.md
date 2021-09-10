@@ -1,57 +1,50 @@
 # nuxt
 
-## 设置 npm 镜像源
+## set up npm Mirror source
 
-查看当前
+View current
 
 ```
 yarn config get registry
 ```
 
-默认
+Default
 
 ```
 yarn config set registry https://registry.yarnpkg.com
 ```
 
-腾讯
+Tencent npm registry
 
 ```
 npm config set registry https://mirrors.tencent.com/npm/
 npm install nrm -g; nrm add tencent https://mirrors.tencent.com/npm/; nrm use tencent;
 ```
 
-node-sass
+## End of line sequence
 
-```
-yarn config set sass_binary_site http://cdn.npm.taobao.org/dist/node-sass -g
-yarn add node-sass
-```
-
-## 行尾序列
-
-先设置 [教程](https://juejin.cn/post/6844904069304156168)
+First [course](https://juejin.cn/post/6844904069304156168)
 
 ```
 git config --global core.autocrlf false
 ```
 
-再重新克隆项目
+Re clone the project
 
 ## Build Setup
 
 ```bash
-# 安装依赖
+# Installation dependency
 $ yarn install
 
-# 启动服务 localhost:3000
+# Start service localhost:3000
 $ yarn start
 
 # build for production and launch server
 $ yarn build
 $ yarn preview
 
-# 静态打包
+# Static packaging
 $ yarn generate
 ```
 

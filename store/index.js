@@ -1,4 +1,4 @@
-// vuex 状态管理
+// vuex State management
 const initState = {
   provider: {
     email: '',
@@ -8,22 +8,29 @@ const initState = {
   assets: [],
   lockHash: '',
 }
-const sotre = {
-  // 严格模式
+const store = {
+  // Strict mode
   strict: false,
-  // 数据
+  // data
   state() {
     return {
       ...initState,
+      query: {
+        success_url: '',
+        pubkey: '',
+        message: '',
+        lang: '',
+      },
+      path: '',
     }
   },
-  // 获取
+  // get
   getters: {
     getUser(state) {
       return state.user
     },
   },
-  // 同步更新
+  // Sync update
   mutations: {
     setUser(state, user) {
       state.user = user
@@ -32,23 +39,23 @@ const sotre = {
       Object.assign(state, initState)
     },
   },
-  // 异步更新
+  // Async update
   actions: {
     // setUserAsync({ commit, state }, user) {
     //   commit('setUser', user)
     //   state.token = user
     // },
   },
-  // 模块
+  // modular
   modules: {},
 }
-export default sotre
+export default store
 
-// 获取
-// this.$store.state.toekn
+// get
+// this.$store.state.token
 // this.$store.getters.getUser
-// 同步更新
-// this.$store.state.toekn = 'dudu'
-// this.$store.commit('setUser', 'dudu')
-// 异步更新
-// await this.$store.dispatch('setUserAsync', 'dudu')
+// Sync update
+// this.$store.state.token = 'test'
+// this.$store.commit('setUser', 'test')
+// Async update
+// await this.$store.dispatch('setUserAsync', 'test')

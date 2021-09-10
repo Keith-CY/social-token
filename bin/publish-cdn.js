@@ -10,35 +10,34 @@ console.log('BUCKET', process.env.OSS_BUCKET)
 console.log('PATH', process.env.OSS_PATH)
 
 const client = new OSS({
-  // 地域节点
+  // Regional node
   region: process.env.OSS_REGION,
   accessKeyId: process.env.OSS_ACCESS_KEY_ID,
   accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET,
-  // 域名
   bucket: process.env.OSS_BUCKET,
 })
-// 上传文件 src = 本地路径 dist = 云端路径
+// Upload file: src = Local path: dist = Cloud path
 let success = 0
 const uploadFile = (src, dist, doc) => {
   client
     .put(dist, src)
     .then((res) => {
       success += 1
-      console.log('上传成功', res.name)
+      console.log('Upload succeeded', res.name)
     })
     .catch(() => {
       if (success > 1) {
-        console.log('上传失败，再次上传', doc)
+        console.log('Upload failed, upload again', doc)
         uploadFile(src, dist)
       } else {
-        console.log('上传失败', doc)
+        console.log('Upload failed', doc)
       }
     })
 }
-// 上传目录 src = 本地路径, dist 云端目录
-const uploaDirectory = (src, dist) => {
+// Upload directory: src = Local path, dist Cloud directory
+const uploadDirectory = (src, dist) => {
   if (fs.existsSync(src) === false) {
-    console.log('请先打包 dist')
+    console.log('Please pack dist first')
     return
   }
   const docs = fs.readdirSync(src)
@@ -46,17 +45,17 @@ const uploaDirectory = (src, dist) => {
     const _src = src + '/' + doc
     const _dist = dist + '/' + doc
     const st = fs.statSync(_src)
-    // 判断是否为文件
+    // Determine whether it is a file
     if (st.isFile() && !['.DS_Store', '.nojekyll'].includes(doc)) {
       uploadFile(_src, _dist, doc)
     } else if (st.isDirectory()) {
-      // 如果是目录则递归调用自身
-      uploaDirectory(_src, _dist)
+      // If it is a directory, call itself recursively
+      uploadDirectory(_src, _dist)
     }
   }
 }
 // https://help.aliyun.com/document_detail/111408.htm?spm=a2c4g.11186623.2.15.61937ff0oYacAG
-// 删除文件
+// Delete file
 const deleteFile = async (name) => {
   try {
     await client.delete(name)
@@ -66,7 +65,7 @@ const deleteFile = async (name) => {
     return error
   }
 }
-// 删除目录
+// Delete directory
 // eslint-disable-next-line
 const deleteDirectory = async (prefix) => {
   const list = await client.list({
@@ -75,14 +74,14 @@ const deleteDirectory = async (prefix) => {
 
   list.objects = list.objects || []
   const result = await Promise.all(list.objects.map((v) => deleteFile(v.name)))
-  console.log('删除完成', result)
+  console.log('Delete complete', result)
 }
 
 // eslint-disable-next-line
 const main = async () => {
-  // 删除
+  // delete
   // await deleteDirectory(process.env.OSS_PATH)
-  // 上传
-  uploaDirectory(process.cwd() + '/dist', process.env.OSS_PATH)
+  // upload
+  uploadDirectory(process.cwd() + '/dist', process.env.OSS_PATH)
 }
 main()
