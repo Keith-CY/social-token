@@ -491,6 +491,9 @@ export default {
         name: this.name,
       })
       this.Sea.localStorage('pendingList', pendingList)
+      const query = this.$route.query
+      query.tab = 'record'
+      this.$router.replace({ path: '/asset', query })
     },
   },
 }

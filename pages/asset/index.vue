@@ -145,7 +145,7 @@ export default {
       showTxItem: false,
       hasMore: true,
       size: 10,
-      activeTab: 'token',
+      activeTab: this.$route.query.tab || 'token',
       itemTx: {},
     }
   },
@@ -303,7 +303,7 @@ export default {
           'txHash',
           'https://explorer.nervos.org/aggron/transaction/' + tx.hash,
         )
-        this.$message.info(t_('Pending'))
+        this.$message.info(this.t_('Pending'))
         return
       }
       this.itemTx = tx
@@ -350,7 +350,7 @@ export default {
           this.hasMore = true
         }
       } else {
-        this.$message.error(t_('RequestFailed'))
+        this.$message.error(this.t_('RequestFailed'))
       }
     },
     async refreshTxRecords() {
