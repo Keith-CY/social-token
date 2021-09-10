@@ -36,11 +36,15 @@
         <div class="token-info">
           <div class="info">
             <div class="left">代币总量：</div>
-            <div class="right">{{ asset.supply }}</div>
+            <div class="right">
+              {{ formatSupply(asset.supply) }}
+            </div>
           </div>
           <div class="info">
             <div class="left">流通量：</div>
-            <div class="right">{{ asset.circulatingSupply }}</div>
+            <div class="right">
+              {{ formatSupply(asset.circulatingSupply) }}
+            </div>
           </div>
           <div class="info">
             <div class="left">发行日期：</div>
@@ -246,10 +250,20 @@ export default {
         this.pendingList = pendingList
       }
     },
+    formatSupply(supply) {
+      if (this.name === 'CKB') {
+        return supply
+      }
+      const balance = new Amount(supply, AmountUnit.shannon)
+      const string = balance.toString(this.decimals, {
+        commify: true,
+        fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
+      })
+      return string
+    },
     formatBalance(tx) {
-      let string = ''
       const balance = new Amount(tx.amount, AmountUnit.shannon)
-      string = balance.toString(this.decimals, {
+      const string = balance.toString(this.decimals, {
         commify: true,
         fixed: this.decimals >= 4 ? 4 : this.decimals || undefined,
       })
