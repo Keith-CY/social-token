@@ -8,7 +8,7 @@ import PWCore, {
   Builder,
   Collector,
 } from '@lay2/pw-core'
-import { getCellDeps } from './config'
+import { getUnipassCellDeps } from './unipass'
 
 const UnipassWitnessArgs = {
   lock: '0x' + '0'.repeat(2082),
@@ -54,7 +54,7 @@ export default class UnipassBuilder extends Builder {
       inputSum.sub(outputCell.capacity),
       PWCore.provider.address.toLockScript(),
     )
-    const cellsDeps = getCellDeps()
+    const cellsDeps = await getUnipassCellDeps()
     // console.log('cellsDeps', cellsDeps)
     const tx = new Transaction(
       new RawTransaction(inputCells, [outputCell, changeCell], cellsDeps),

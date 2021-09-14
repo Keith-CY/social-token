@@ -99,9 +99,9 @@ export default {
           if (e.symbol === 'DAO') {
             continue
           }
-          if (e.symbol === 'CKB') {
-            continue
-          }
+          // if (e.symbol === 'CKB') {
+          //   continue
+          // }
           const capacity = new Amount(e.capacity, AmountUnit.shannon)
           let typeScript = null
           if (e.typeScript) {

@@ -84,10 +84,3 @@ export function getCkbEnv(): Url {
   if (isLina) data = mainCKB
   return data
 }
-
-export function getCellDeps(): CellDep[] {
-  const isLina = process.env.CKB_CHAIN_ID === '0'
-  let data = AggronCellDeps
-  if (isLina) data = LinaCellDeps
-  return data
-}
