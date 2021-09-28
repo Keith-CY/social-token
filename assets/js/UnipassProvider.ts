@@ -40,6 +40,7 @@ export default class UnipassProvider extends Provider {
   get email() {
     return this._email
   }
+
   get recovery() {
     return this._recovery
   }
@@ -58,10 +59,12 @@ export default class UnipassProvider extends Provider {
       resolve(this)
     })
   }
+
   async recover(): Promise<UnipassProvider> {
     // console.log('[UnipassProvider] to recover')
     return new Promise((resolve) => resolve(this))
   }
+
   sign(message: string): Promise<string> {
     // console.log('[UnipassProvider] message to sign', message)
     return new Promise((resolve) => resolve(''))
@@ -81,22 +84,11 @@ export function pubkeyToAddress(pubkey: string): string {
     .digest()
     .serializeJson()
     .slice(0, 42)
-  // console.log('------hashHex', hashHex)
-  const isLina = window.localStorage.getItem('lina')
-  let script: Script
-  if (isLina) {
-    script = new Script(
-      '0x614d40a86e1b29a8f4d8d93b9f3b390bf740803fa19a69f1c95716e029ea09b3',
-      hashHex,
-      HashType.type,
-    )
-  } else {
-    script = new Script(
-      '0x124a60cd799e1fbca664196de46b3f7f0ecb7138133dcaea4893c51df5b02be6',
-      hashHex,
-      HashType.type,
-    )
-  }
+  const script: Script = new Script(
+    process.env.UNIPASS_TYPE_ID as string,
+    hashHex,
+    HashType.type,
+  )
 
   // console.log('script', script)
   return script.toAddress().toCKBAddress()
