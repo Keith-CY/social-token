@@ -98,7 +98,7 @@ export default {
         try {
           const amount = new Amount(value)
           if (amount.lt(new Amount('61'))) {
-            callback(new Error(this.t_('Minimum')))
+            callback(new Error(this.t_('Minimum', { data: 61 })))
             return
           }
           const asset = this.asset
@@ -240,8 +240,8 @@ export default {
     }
   },
   methods: {
-    t_(key) {
-      return this.$t('send.' + key)
+    t_(key, data = {}) {
+      return this.$t('send.' + key, data)
     },
     async bindBlur() {
       const address = this.form.address
