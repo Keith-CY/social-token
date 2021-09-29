@@ -299,10 +299,7 @@ export default {
     },
     bindTx(tx) {
       if (tx.type === 'pending') {
-        console.log(
-          'txHash',
-          'https://explorer.nervos.org/aggron/transaction/' + tx.hash,
-        )
+        console.log('txHash', process.env.CKB_EXPLORER_URL + tx.hash)
         this.$message.info(this.t_('Pending'))
         return
       }

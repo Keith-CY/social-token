@@ -45,11 +45,7 @@
         <div class="value">{{ tx.remark || '-' }}</div>
       </div>
     </div>
-    <a
-      class="explorer"
-      :href="`https://explorer.nervos.org/aggron/transaction/${tx.hash}`"
-      target="_blank"
-    >
+    <a class="explorer" :href="`${CKB_EXPLORER_URL}${tx.hash}`" target="_blank">
       <img src="~/assets/img/explorer.svg" />
       <span>{{ t_('browser') }}</span>
     </a>
@@ -74,7 +70,9 @@ export default {
     },
   },
   data() {
-    return {}
+    return {
+      CKB_EXPLORER_URL: process.env.CKB_EXPLORER_URL,
+    }
   },
   computed: {
     showDialog: {
