@@ -77,5 +77,14 @@ module.exports = {
     cancel: 'Cancel',
     SendSuccess: 'Transfer submitted',
     SendFailed: 'Transaction failed',
+    // tip send cell
+    Tip1Title: 'Tips',
+    Tip1: `He doesn't have this token yet. Do you want to transfer a cell to the other party?`,
+    Tip1Confirm: 'Confirm',
+    Tip1Cancel: 'Cancel',
+    // tip send cell no enough ckb
+    Tip2Title: 'Tips',
+    Tip2: `He doesn't have this token yet, and you don't have enough CKB to send it to the other party`,
+    Tip2Confirm: 'OK',
   },
 }
