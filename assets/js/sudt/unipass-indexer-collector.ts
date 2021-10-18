@@ -125,7 +125,6 @@ export class UnipassIndexerCollector extends SUDTCollector {
         script: sudt.toTypeScript().serializeJson() as SnakeScript,
       },
     }
-    console.log('searchKey===>', searchKey)
     let accCapacity = Amount.ZERO
     const terminator: Terminator = (_index, cell) => {
       if (accCapacity.gte(options.neededAmount as Amount)) {

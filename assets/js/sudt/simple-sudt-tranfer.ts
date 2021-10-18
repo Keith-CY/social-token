@@ -2,13 +2,16 @@ import PWCore, {
   Address,
   Amount,
   AmountUnit,
-  BuilderOption,
+  Builder,
   SUDT,
   transformers,
 } from '@lay2/pw-core'
 import { getUnipassCellDeps } from '../unipass'
 import UnipassSigner from '../UnipassSigner'
-import { SimpleSUDTBuilder } from './simple-sudt-builder'
+import {
+  SimpleSUDTBuilder,
+  SimpleSUDTBuilderOptions,
+} from './simple-sudt-builder'
 import { UsdtProvider } from './sudt-provider'
 import { UnipassIndexerCollector } from './unipass-indexer-collector'
 
@@ -16,7 +19,8 @@ export async function getBalanceEnough() {
   const balance = await PWCore.defaultCollector.getBalance(
     PWCore.provider.address,
   )
-  return balance.gt(new Amount('204', AmountUnit.ckb))
+  console.log('balance=', balance)
+  return balance.gte(new Amount('143', AmountUnit.ckb).add(Builder.MIN_CHANGE))
 }
 
 export async function getSimpleUSDTSignMessage(
@@ -26,8 +30,6 @@ export async function getSimpleUSDTSignMessage(
   masterPubkey: string,
 ) {
   const provider = new UsdtProvider(masterPubkey)
-  const usdtAddress = provider.address
-  console.log('usdtAddress', usdtAddress.addressString)
 
   const cellDeps = await getUnipassCellDeps()
   const lockLen = (1 + (8 + 256 * 2) * 2) * 2
@@ -35,13 +37,14 @@ export async function getSimpleUSDTSignMessage(
     process.env.CKB_INDEXER_URL as string,
   )
 
-  const builderOption: BuilderOption = {
+  const builderOption: SimpleSUDTBuilderOptions = {
     witnessArgs: {
       lock: '0x' + '0'.repeat(lockLen),
       input_type: '',
       output_type: '',
     },
     collector,
+    minimumOutputCellCapacity: new Amount('143'),
   }
 
   const sudt = new SUDT(sudtTokenId)

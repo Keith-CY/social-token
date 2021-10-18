@@ -154,8 +154,9 @@ export default {
       feeLoading: false,
       loading: false,
       form: {
-        address: '',
-        amount: '',
+        address:
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dusc6l0nlyv80d3dn78qtd8e4kryxgtj5e7mdh6',
+        amount: '11',
       },
       fee: name === 'CKB' ? '0.00001551' : '0.00002040',
       feeRate: 1000,
@@ -213,6 +214,7 @@ export default {
     if (!name) {
       this.$router.replace('/')
     }
+    getBalanceEnough()
   },
   mounted() {
     if (this.balance) {
@@ -290,16 +292,8 @@ export default {
           capacity: new Amount('1', AmountUnit.shannon).toHexString(),
         },
       })
-      const enough = await getBalanceEnough()
 
       if (res.data.length === 0) {
-        console.log(enough)
-        if (!enough) {
-          // This asset does not exist at the opposite address, and cannot be transferred
-          this.$message.error(this.t_('DoesNot'))
-          this.loading = false
-          return
-        }
         // todo prop window
 
         if (address && amount && this.sudtTokenId) {
