@@ -154,9 +154,8 @@ export default {
       feeLoading: false,
       loading: false,
       form: {
-        address:
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dusc6l0nlyv80d3dn78qtd8e4kryxgtj5e7mdh6',
-        amount: '11',
+        address: '',
+        amount: '',
       },
       fee: name === 'CKB' ? '0.00001551' : '0.00002040',
       feeRate: 1000,
@@ -265,13 +264,13 @@ export default {
           if (this.name === 'CKB') {
             await this.buildCKB()
           } else {
-            await this.buildST()
+            await this.buildST(true)
           }
         } catch (error) {}
         this.feeLoading = false
       }
     },
-    async buildST() {
+    async buildST(blur) {
       // check
       const provider = this.provider
       const { address, amount } = this.form
@@ -292,20 +291,43 @@ export default {
           capacity: new Amount('1', AmountUnit.shannon).toHexString(),
         },
       })
-
       if (res.data.length === 0) {
-        // todo prop window
-
-        if (address && amount && this.sudtTokenId) {
-          const { tx, txObj, message } = await getSimpleUSDTSignMessage(
-            this.sudtTokenId,
-            new Address(address, AddressType.ckb),
-            new Amount(amount, this.decimals),
-            provider.pubkey,
-          )
-          const fee = Builder.calcFee(tx, this.feeRate)
-          this.fee = fee.toString(8, AmountUnit.shannon)
-          return { txObj, message }
+        const enough = await getBalanceEnough()
+        if (enough) {
+          const getData = async () => {
+            if (address && amount && this.sudtTokenId) {
+              const { tx, txObj, message } = await getSimpleUSDTSignMessage(
+                this.sudtTokenId,
+                new Address(address, AddressType.ckb),
+                new Amount(amount, this.decimals),
+                provider.pubkey,
+              )
+              const fee = Builder.calcFee(tx, this.feeRate)
+              this.fee = fee.toString(8, AmountUnit.shannon)
+              return { txObj, message }
+            }
+          }
+          const data = await getData()
+          if (blur) {
+            return data
+          } else {
+            this.$confirm(this.t_('Tip1'), this.t_('Tip1Title'), {
+              confirmButtonText: this.t_('Tip1Confirm'),
+              cancelButtonText: this.t_('Tip1Cancel'),
+            })
+              .then(() => {
+                this.sendST(data)
+              })
+              .catch(() => {
+                this.loading = false
+              })
+          }
+        } else if (!blur) {
+          this.$alert(this.t_('Tip2'), this.t_('Tip2Title'), {
+            confirmButtonText: this.t_('Tip2Confirm'),
+          }).then(() => {
+            this.loading = false
+          })
         }
       } else if (address && amount && this.sudtTokenId) {
         const { tx, txObj, message } = await getUSDTSignMessage(
@@ -357,12 +379,14 @@ export default {
         this.sendST()
       }
     },
-    async sendST() {
+    async sendST(data) {
       const provider = this.provider
       const { address, amount } = this.form
       // send
       try {
-        const data = await this.buildST()
+        if (!data) {
+          data = await this.buildST()
+        }
         if (data) {
           const { message, txObj } = data
           this.Sea.localStorage('signData', {

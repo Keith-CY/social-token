@@ -2,7 +2,7 @@ import PWCore, {
   Address,
   Amount,
   AmountUnit,
-  Builder,
+  // Builder,
   SUDT,
   transformers,
 } from '@lay2/pw-core'
@@ -16,11 +16,14 @@ import { UsdtProvider } from './sudt-provider'
 import { UnipassIndexerCollector } from './unipass-indexer-collector'
 
 export async function getBalanceEnough() {
-  const balance = await PWCore.defaultCollector.getBalance(
-    PWCore.provider.address,
-  )
-  console.log('balance=', balance)
-  return balance.gte(new Amount('143', AmountUnit.ckb).add(Builder.MIN_CHANGE))
+  if (PWCore.defaultCollector) {
+    const balance = await PWCore.defaultCollector.getBalance(
+      PWCore.provider.address,
+    )
+    console.log('balance=', balance)
+    // critical value .add(Builder.MIN_CHANGE) +61
+    return balance.gte(new Amount('143', AmountUnit.ckb))
+  }
 }
 
 export async function getSimpleUSDTSignMessage(

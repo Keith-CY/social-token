@@ -77,5 +77,14 @@ module.exports = {
     cancel: '取消',
     SendSuccess: '发送成功',
     SendFailed: '交易失败',
+    // tip send cell
+    Tip1Title: '提示',
+    Tip1: '他还没有这个代币，是否转一个CELL给对方？',
+    Tip1Confirm: '确认',
+    Tip1Cancel: '取消',
+    // tip send cell no enough ckb
+    Tip2Title: '提示',
+    Tip2: '他还没有这个代币，且你没有足够的CKB，无法发送给对方',
+    Tip2Confirm: '好吧',
   },
 }

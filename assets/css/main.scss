@@ -389,6 +389,9 @@ a {
       font-size: initial !important;
       font-weight: normal !important;
     }
+    .el-button + .el-button {
+      margin-left: 10px !important;
+    }
   }
 }
 // mobile css

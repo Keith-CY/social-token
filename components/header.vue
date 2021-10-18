@@ -21,10 +21,10 @@
           <img src="~/assets/img/lang.svg" />
           <span>{{ t_('lang') }}</span>
         </div>
-        <div class="one" @click="bindWechat">
+        <!-- <div class="one" @click="bindWechat">
           <img src="~/assets/img/wechat.svg" />
           <span>{{ t_('wechat') }}</span>
-        </div>
+        </div> -->
         <div class="one exit" @click="showClose = true">
           <img src="~/assets/img/exit.svg" />
           <span>{{ t_('logout') }}</span>
