@@ -64,6 +64,11 @@ import {
   getUSDTSignMessage,
   getSUDTSignCallback,
 } from '~/assets/js/sudt/sudt-tranfer'
+import {
+  getSimpleUSDTSignMessage,
+  getBalanceEnough,
+} from '~/assets/js/sudt/simple-sudt-tranfer'
+
 import { getCkbEnv } from '~/assets/js/config'
 import UnipassBuilder from '~/assets/js/UnipassBuilder.ts'
 import UnipassBuilderClear from '~/assets/js/UnipassBuilderClear.ts'
@@ -285,14 +290,30 @@ export default {
           capacity: new Amount('1', AmountUnit.shannon).toHexString(),
         },
       })
+      const enough = await getBalanceEnough()
+
       if (res.data.length === 0) {
-        // This asset does not exist at the opposite address, and cannot be transferred
-        this.$message.error(this.t_('DoesNot'))
-        this.loading = false
-        return
-      }
-      // build
-      if (address && amount && this.sudtTokenId) {
+        console.log(enough)
+        if (!enough) {
+          // This asset does not exist at the opposite address, and cannot be transferred
+          this.$message.error(this.t_('DoesNot'))
+          this.loading = false
+          return
+        }
+        // todo prop window
+
+        if (address && amount && this.sudtTokenId) {
+          const { tx, txObj, message } = await getSimpleUSDTSignMessage(
+            this.sudtTokenId,
+            new Address(address, AddressType.ckb),
+            new Amount(amount, this.decimals),
+            provider.pubkey,
+          )
+          const fee = Builder.calcFee(tx, this.feeRate)
+          this.fee = fee.toString(8, AmountUnit.shannon)
+          return { txObj, message }
+        }
+      } else if (address && amount && this.sudtTokenId) {
         const { tx, txObj, message } = await getUSDTSignMessage(
           this.sudtTokenId,
           new Address(address, AddressType.ckb),
@@ -303,6 +324,7 @@ export default {
         this.fee = fee.toString(8, AmountUnit.shannon)
         return { txObj, message }
       }
+      // build
     },
     async buildCKB() {
       const { address, amount } = this.form

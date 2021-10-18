@@ -63,8 +63,8 @@ export async function getUSDTSignMessage(
 }
 
 export async function getSUDTSignCallback(sig: string, txObj: any) {
-  // console.log('getTakerSignCallback-sig', sig)
-  // console.log('getTakerSignCallback-txObj', txObj)
+  console.log('getTakerSignCallback-sig', sig)
+  console.log('getTakerSignCallback-txObj', txObj)
   const witnessArgs: WitnessArgs = {
     lock: '0x01' + sig.replace('0x', ''),
     input_type: '',
@@ -76,10 +76,10 @@ export async function getSUDTSignCallback(sig: string, txObj: any) {
   txObj.witnesses[0] = witness
 
   const transformedTx = await transformers.TransformTransaction(txObj)
-  // console.log('transformedTx', JSON.stringify(transformedTx))
+  console.log('transformedTx', JSON.stringify(transformedTx))
   const rpc = new RPC(process.env.CKB_NODE_URL as string)
   try {
-    const txhash = await rpc.send_transaction(transformedTx)
+    const txhash = await rpc.send_transaction(transformedTx, 'passthrough')
     return txhash
   } catch (e) {
     console.log(e)
