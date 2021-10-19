@@ -462,7 +462,7 @@ export default {
         txObj.witnesses[0] = witness
         const url = getCkbEnv()
         const rpc = new RPC(url.NODE_URL)
-        const txHash = await rpc.send_transaction(txObj)
+        const txHash = await rpc.send_transaction(txObj, 'passthrough')
         if (txHash) {
           this.$message.success(this.t_('SendSuccess'))
           this.pendingList(txHash, pending)
