@@ -21,7 +21,7 @@
     <div class="box">
       <div class="balance">{{ formatBalance(tx) }} {{ asset.symbol }}</div>
       <div class="one">
-        <div class="label">{{ t_('title') }}</div>
+        <div class="label">{{ t_('from') }}</div>
         <div class="value">{{ tx.from }}</div>
       </div>
       <div class="one">
