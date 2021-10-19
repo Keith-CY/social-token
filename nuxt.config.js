@@ -4,7 +4,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'Portal Wallet',
+    title: 'Social Token',
     meta: [
       { charset: 'utf-8' },
       {
@@ -14,7 +14,9 @@ export default {
       },
       { hid: 'description', name: 'description', content: '' },
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [
+      { rel: 'icon', type: 'image/x-icon', href: 'data:image/ico;base64,aWNv' },
+    ],
     script: [
       {
         src: 'https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js',
