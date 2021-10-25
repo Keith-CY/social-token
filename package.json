@@ -28,6 +28,7 @@
     "element-ui": "^2.15.1",
     "graphql": "^15.5.0",
     "graphql-tag": "^2.12.4",
+    "jsqr": "1.4.0",
     "mobile-detect": "^1.4.5",
     "node-forge": "^0.10.0",
     "qrcode": "^1.4.4",
