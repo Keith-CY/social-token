@@ -1,6 +1,6 @@
 <template>
   <div>
-    <video ref="camera" />
+    <video ref="camera" playsinline />
     <canvas ref="canvas" />
     <el-button type="primary" class="send" @click="start">
       {{ t_('scan') }}
