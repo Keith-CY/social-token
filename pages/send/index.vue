@@ -12,6 +12,7 @@
         <el-input
           ref="address"
           v-model.trim="form.address"
+          class-name="address"
           type="textarea"
           :placeholder="t_('CKBAddress')"
           resize="none"
@@ -19,7 +20,11 @@
           autosize
           @keyup.enter="$refs.amount.focus()"
           @blur="bindBlur"
-        ></el-input>
+        >
+        </el-input>
+        <el-button class="scan" @click="scan">
+          <img src="~/assets/img/send/scan.svg" />
+        </el-button>
       </el-form-item>
       <div class="balance">{{ balance }} {{ asset.symbol }}</div>
       <el-form-item :label="t_('Money')" prop="amount">
@@ -45,9 +50,14 @@
     >
       {{ t_('Send') }}
     </el-button>
+    <el-button class="stop-scan" :attr-scanning="isScanning" @click="stopScan">
+      <img class="qrcode" src="~/assets/img/send/close.svg" />
+    </el-button>
+    <video ref="camera" playsinline :attr-scanning="isScanning" />
   </div>
 </template>
 <script>
+import jsQR from 'jsqr'
 import PWCore, {
   RPC,
   Reader,
@@ -165,6 +175,8 @@ export default {
       nowTx: null,
       oldAmount: '',
       oldAddress: '',
+      isScanning: false,
+      frameId: undefined,
     }
   },
   computed: {
@@ -207,6 +219,9 @@ export default {
       }
       return ''
     },
+  },
+  beforeUnmount() {
+    this.stopScan()
   },
   created() {
     const name = this.name
@@ -535,6 +550,96 @@ export default {
       query.tab = 'record'
       this.$router.replace({ path: '/asset', query })
     },
+    async scan() {
+      if (this.isScanning) {
+        return
+      }
+      this.isScanning = true
+
+      try {
+        const stream = await window.navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+          audio: false,
+        })
+
+        if (!stream) {
+          window.alert('no source found')
+          return
+        }
+
+        const camera = this.$refs.camera
+        const canvas = document.createElement('canvas')
+        const requestAnimationFrame =
+          window.requestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.msRequestAnimationFrame
+
+        camera.srcObject = stream
+        camera.play()
+        const tick = () => {
+          if (!this.isScanning) {
+            this.stopScan()
+            return
+          }
+          if (camera.readyState === camera.HAVE_ENOUGH_DATA && canvas) {
+            canvas.width = camera.videoWidth
+            canvas.height = camera.videoHeight
+            const ctx = canvas.getContext('2d')
+            if (ctx) {
+              const rect = [0, 0, canvas.width, canvas.height]
+              ctx.drawImage(camera, ...rect)
+              const imageData = ctx.getImageData(...rect)
+              const code = jsQR(imageData.data, rect[2], rect[3], {
+                inversionAttemps: 'dontInvert',
+              })
+              if (code && this.isAddressValid(code.data)) {
+                this.form.address = code.data
+                camera.pause()
+                this.stopScan()
+              }
+            }
+          }
+          this.frameId = requestAnimationFrame(tick)
+        }
+        this.frameId = requestAnimationFrame(tick)
+      } catch (err) {
+        // TODO: error message should be treated with i18n
+        window.alert(err)
+      }
+    },
+    stopScan() {
+      this.isScanning = false
+      this.$refs.camera.srcObject = null
+      if (this.frameId) {
+        const cancelAnimationFrame =
+          window.cancelAnimationFrame || window.mozCancelAnimationFrame
+
+        cancelAnimationFrame(this.frameId)
+        this.frameId = undefined
+      }
+    },
+    isAddressValid(address) {
+      if (!address) {
+        return false
+      }
+
+      try {
+        if (address.startsWith('ckb') || address.startsWith('ckt')) {
+          // eslint-disable-next-line no-new
+          new Address(address, AddressType.ckb)
+          return true
+        }
+        if (/^0x[a-fA-F0-9]{40}$/.test(address)) {
+          // eslint-disable-next-line no-new
+          new Address(address, AddressType.eth)
+          return true
+        }
+        return false
+      } catch (error) {
+        return false
+      }
+    },
   },
 }
 </script>
@@ -565,5 +670,57 @@ export default {
     margin-bottom: 40px;
     width: 100%;
   }
+  .address {
+    paddingRight: 30px;
+  }
+  video {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 100%;
+    top: 100%;
+    &[attr-scanning='true'] {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height 100vh;
+    background: #000;
+    object-fix: contain;
+  }
+  }
+  .scan {
+    display: flex;
+    background: transparent;
+    width: min-content;
+    height: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 54px;
+  }
+  .stop-scan {
+    z-index: 999;
+    display:none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    &[attr-scanning='true'] {
+      background: transparent;
+      display: flex;
+    }
+  }
+  .scan, .stop-scan {
+    justify-content: center;
+    align-items: center;
+    border: none;
+    img {
+      width: 25px;
+      height: 25px;
+    }
+  }
+  textarea[class-name='address'] {
+    padding-right: 30px;
+  }
+
 }
 </style>

@@ -87,8 +87,4 @@ module.exports = {
     Tip2: `The receiver has no cell to store this asset, unable to transfer`,
     Tip2Confirm: 'OK',
   },
-  scanner: {
-    title: 'Scanner',
-    scan: 'Scan',
-  },
 }

@@ -87,8 +87,4 @@ module.exports = {
     Tip2: '对方暂无此资产，无法完成转账',
     Tip2Confirm: '好吧',
   },
-  scanner: {
-    title: '扫描',
-    scan: '扫描',
-  },
 }
